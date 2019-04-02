@@ -18,7 +18,6 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"net/http"
 	"net/url"
 	"strings"
@@ -238,17 +237,17 @@ func parseResponse(rc *recordCollector) (cookieCount int, resultData []*reportRe
 
 func estimatedDuration(d time.Duration) string {
 	if d >= 365*24*time.Hour {
-		return fmt.Sprintf("%.1f year", math.Ceil(float64(d)/float64(365*24*time.Hour)))
+		return fmt.Sprintf("%.1f year", float64(d)/float64(365*24*time.Hour))
 	} else if d >= 30*24*time.Hour {
-		return fmt.Sprintf("%.1f month", math.Ceil(float64(d)/float64(30*24*time.Hour)))
+		return fmt.Sprintf("%.1f month", float64(d)/float64(30*24*time.Hour))
 	} else if d >= 24*time.Hour {
-		return fmt.Sprintf("%.1f day", math.Ceil(float64(d)/float64(24*time.Hour)))
+		return fmt.Sprintf("%.1f day", float64(d)/float64(24*time.Hour))
 	} else if d >= time.Hour {
-		return fmt.Sprintf("%.1f hour", math.Ceil(float64(d)/float64(time.Hour)))
+		return fmt.Sprintf("%.1f hour", float64(d)/float64(time.Hour))
 	} else if d >= time.Minute {
-		return fmt.Sprintf("%.1f min", math.Ceil(float64(d)/float64(time.Minute)))
+		return fmt.Sprintf("%.1f min", float64(d)/float64(time.Minute))
 	} else if d >= time.Second {
-		return fmt.Sprintf("%.1f sec", math.Ceil(float64(d)/float64(time.Second)))
+		return fmt.Sprintf("%.1f sec", float64(d)/float64(time.Second))
 	} else {
 		return "Session"
 	}
