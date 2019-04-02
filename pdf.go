@@ -73,7 +73,7 @@ func init() {
 		<dt class="col-sm-2">Server Address</dt>
 		<dd class="col-sm-10">{{$r.RemoteAddr}}</dd>
 		<dt class="col-sm-2">Mime Type</dt>
-		<dd class="col-sm-10">{{$r.MimeType}}</dd>
+		<dd class="col-sm-10">{{if ne $r.MimeType ""}}{{$r.MimeType}}{{else}}-{{end}}</dd>
 		<dt class="col-sm-2">Used Requests</dt>
 		<dd class="col-sm-10">{{$c.UsedRequests}}</dd>
 	</dl>
@@ -90,7 +90,7 @@ func init() {
 }
 
 func outputAsHTML(data *reportData, htmlFile string) (err error) {
-	f, err := os.OpenFile(htmlFile, os.O_WRONLY|os.O_CREATE, 0755)
+	f, err := os.OpenFile(htmlFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0755)
 	if err != nil {
 		err = errors.Wrap(err, "write html report failed")
 		return
