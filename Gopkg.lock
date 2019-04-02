@@ -2,76 +2,36 @@
 
 
 [[projects]]
-  digest = "1:c2ddd93eef81fb598f6264e46036582132ce7e386cfb30210d63167f1641a32a"
-  name = "github.com/chromedp/cdproto"
-  packages = [
-    ".",
-    "accessibility",
-    "animation",
-    "applicationcache",
-    "audits",
-    "backgroundservice",
-    "browser",
-    "cachestorage",
-    "cast",
-    "cdp",
-    "css",
-    "database",
-    "debugger",
-    "deviceorientation",
-    "dom",
-    "domdebugger",
-    "domsnapshot",
-    "domstorage",
-    "emulation",
-    "fetch",
-    "headlessexperimental",
-    "heapprofiler",
-    "indexeddb",
-    "input",
-    "inspector",
-    "io",
-    "layertree",
-    "log",
-    "memory",
-    "network",
-    "overlay",
-    "page",
-    "performance",
-    "profiler",
-    "runtime",
-    "security",
-    "serviceworker",
-    "storage",
-    "systeminfo",
-    "target",
-    "testing",
-    "tethering",
-    "tracing",
-  ]
+  branch = "master"
+  digest = "1:71fb97e52979668d72f16c6c94851bf99ae1187998f2a2415d6f5ffa5e2592bb"
+  name = "github.com/gobs/args"
+  packages = ["."]
   pruneopts = "UT"
-  revision = "a6af647da9b18c20313895d9d3f931162a220811"
+  revision = "86002b4df18c1c4919c97bd7b7bd46e216fc69c3"
 
 [[projects]]
   branch = "master"
-  digest = "1:00431166ec93ef9f8bea798d05b6183857c627c2929f4bed806cbf62dccead44"
-  name = "github.com/chromedp/chromedp"
-  packages = [
-    ".",
-    "client",
-    "kb",
-    "runner",
-  ]
-  pruneopts = "UT"
-  revision = "39bd95c850a4a1a375c73469fc19e16ada435141"
-
-[[projects]]
-  digest = "1:47cebe27e59e4e0c239d0bf2419d6a46f0364a56efc43be702c32b82710b6ecf"
-  name = "github.com/disintegration/imaging"
+  digest = "1:0f907b6a016b81d60ac2b9a74cdf4c17ed06598aab2d4782594267ac4099aff7"
+  name = "github.com/gobs/httpclient"
   packages = ["."]
   pruneopts = "UT"
-  revision = "5362c131d56305ce787e79a5b94ffc956df00d62"
-  version = "v1.6.0"
+  revision = "a93d469d8657e74a3d5a8f72bd46b54a19c341f1"
+
+[[projects]]
+  branch = "master"
+  digest = "1:766bf25377bc2a5bd7b7b2bbe3a490200be68cc325c63db9f338316357086f2f"
+  name = "github.com/gobs/pretty"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "09732c25a95b8e10e85177a3201cf4c7fe35a377"
+
+[[projects]]
+  branch = "master"
+  digest = "1:1496b3a835688df2d11c7357c120b1134a939afbcd16370a1ab6f1272ec8a377"
+  name = "github.com/gobs/simplejson"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "c70e6bd5e26b37fd37b5225d00d600b93d348e58"
 
 [[projects]]
   digest = "1:7b5c6e2eeaa9ae5907c391a91c132abfd5c9e8a784a341b5625e750c67e6825d"
@@ -83,52 +43,37 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:957b15d94d4771a424b6ccb959214fe8caafb7d791d0f588ac572b7cdc894457"
-  name = "github.com/knq/snaker"
+  digest = "1:438016f7d4af8e5a7010b6d0705b267a7607ddc0decad051e83a9458c6b9a523"
+  name = "github.com/jmoiron/jsonq"
   packages = ["."]
   pruneopts = "UT"
-  revision = "2bc8a4db468777180ca38d551094b83073bed25f"
+  revision = "e874b168d07ecc7808bc950a17998a8aa3141d82"
 
 [[projects]]
-  branch = "master"
-  digest = "1:8cb15b21828b36ad568850d0ecb9340e22b148c8c6755f4a3d7918021bfc38a2"
-  name = "github.com/knq/sysutil"
+  digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
+  name = "github.com/pkg/errors"
   packages = ["."]
   pruneopts = "UT"
-  revision = "f05b59f0f3075ba1bc5701ef0df4393a05ebd0e7"
+  revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
+  version = "v0.8.1"
 
 [[projects]]
   branch = "master"
-  digest = "1:b8774f0cf1c719f5253e92f1fc7880b4186046064c3c23ead99ab568028a6510"
-  name = "github.com/mailru/easyjson"
-  packages = [
-    ".",
-    "buffer",
-    "jlexer",
-    "jwriter",
-  ]
+  digest = "1:fc0a6090d16ce2e378fb61fd4e57082864be0bf46a84f64907812482aa0c2cad"
+  name = "github.com/raff/godet"
+  packages = ["."]
   pruneopts = "UT"
-  revision = "1de009706dbeb9d05f18586f0735fcdb7c524481"
-
-[[projects]]
-  branch = "master"
-  digest = "1:4c5fae3d31eb72f59429f9218ff258128ef37edcae9785f93bb9f1609b392c51"
-  name = "golang.org/x/image"
-  packages = [
-    "bmp",
-    "tiff",
-    "tiff/lzw",
-  ]
-  pruneopts = "UT"
-  revision = "3fc05d484e9f77dd51816890e05f2602e4ca4d65"
+  revision = "7f5db8f2b8ab95373b0327aa39b63e5542644bc8"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/chromedp/cdproto/cdp",
-    "github.com/chromedp/cdproto/network",
-    "github.com/chromedp/chromedp",
+    "github.com/gobs/args",
+    "github.com/gobs/pretty",
+    "github.com/jmoiron/jsonq",
+    "github.com/pkg/errors",
+    "github.com/raff/godet",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
