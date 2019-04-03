@@ -17,13 +17,12 @@
 package main
 
 import (
+	"github.com/pkg/errors"
+	"github.com/raff/godet"
 	"html/template"
 	"os"
 	"path/filepath"
 	"time"
-
-	"github.com/pkg/errors"
-	"github.com/raff/godet"
 )
 
 var (
@@ -36,20 +35,20 @@ func init() {
 <html>
 <head>
 <title>Cookie scan report</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css">
 </head>
 <body>
 <div class="container">
 	<h1>Cookie scan report</h1>
+	<p>&nbsp;</p>
 	<h2>Summary</h2>
 	<hr>
 	<dl class="row">
-		<dt class="col-sm-2">Scan date</dt>
-		<dd class="col-sm-10">{{.ScanTime}}</d>
-		<dt class="col-sm-2">Scan URL</dt>
+		<dt class="col-sm-2">Scan&nbsp;date</dt>
+		<dd class="col-sm-10">{{.ScanTime}}</dd>
+		<dt class="col-sm-2">Scan&nbsp;URL</dt>
 		<dd class="col-sm-10">{{.ScanURL}}</dd>
-		<dt class="col-sm-2">Cookies (in total)</dt>
+		<dt class="col-sm-2">Cookies&nbsp;(in&nbsp;total)</dt>
 		<dd class="col-sm-10">{{.CookieCount}}</dd>
 	</dl>
 	<h2>Cookies</h2>
@@ -70,11 +69,11 @@ func init() {
 		<dd class="col-sm-10">{{$r.Initiator}}</dd>
 		<dt class="col-sm-2">Source</dt>
 		<dd class="col-sm-10">{{if ne $r.Source "" }}{{$r.Source}}{{if gt $r.LineNo 0}}: {{$r.LineNo}}{{end}}{{else}}-{{end}}</dd>
-		<dt class="col-sm-2">Server Address</dt>
+		<dt class="col-sm-2">Server&nbsp;Address</dt>
 		<dd class="col-sm-10">{{$r.RemoteAddr}}</dd>
-		<dt class="col-sm-2">Mime Type</dt>
+		<dt class="col-sm-2">Mime&nbsp;Type</dt>
 		<dd class="col-sm-10">{{if ne $r.MimeType ""}}{{$r.MimeType}}{{else}}-{{end}}</dd>
-		<dt class="col-sm-2">Used Requests</dt>
+		<dt class="col-sm-2">Used&nbsp;Requests</dt>
 		<dd class="col-sm-10">{{$c.UsedRequests}}</dd>
 	</dl>
 	{{else}}
@@ -114,7 +113,7 @@ func outputAsPDF(remote *godet.RemoteDebugger, htmlFile string, pdfFile string) 
 	if err = remote.ActivateTab(tab); err != nil {
 		return
 	}
-	time.Sleep(5 * time.Second)
+	time.Sleep(time.Second)
 	err = remote.SavePDF(pdfFile, 0644, godet.PortraitMode())
 
 	return
