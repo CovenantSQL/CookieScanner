@@ -7,6 +7,12 @@ Cookie Tester is a simple utility to analyze website cookie status and generate 
 Requires MacOS/Linux system.
 
 First, install [`Google Chrome`](<https://www.google.com/chrome/>) in your operating system.
+Or you can start a headless Chrome in docker with
+
+```shell
+$ docker container run -d -p 9222:9222 zenika/alpine-chrome --no-sandbox \ 
+ --remote-debugging-address=0.0.0.0 --remote-debugging-port=9222
+```
 
 Then, install the `CookieTester` using `go get`.
 
@@ -18,7 +24,7 @@ $ go get github.com/CovenantSQL/CookieTester
 
 CookieTester is capable of geneating reports in `json/html/pdf` format.
 
-```shell
+```
 $ CookieTester -help
 Usage of ./CookieTester:
   -cmd string
