@@ -19,24 +19,17 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
-	"os"
-	"os/exec"
-	"runtime"
-	"strings"
-	"syscall"
 	"time"
 
-	"github.com/gobs/args"
+	"github.com/CovenantSQL/CookieTester/parser"
 	"github.com/gobs/pretty"
-	"github.com/raff/godet"
 )
 
 var (
 	cmd               string
 	headless          bool
-	port              string
+	port              int
 	version           bool
 	verbose           bool
 	startTime         = time.Now().UTC()
@@ -48,60 +41,9 @@ var (
 )
 
 func init() {
-	var chromeapp string
-
-	switch runtime.GOOS {
-	case "darwin":
-		for _, c := range []string{
-			"/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary",
-			"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-		} {
-			// MacOS apps are actually folders
-			if _, err := exec.LookPath(c); err == nil {
-				chromeapp = fmt.Sprintf("%q", c)
-				break
-			}
-		}
-
-	case "linux":
-		for _, c := range []string{
-			"headless_shell",
-			"chromium",
-			"google-chrome-beta",
-			"google-chrome-unstable",
-			"google-chrome-stable"} {
-			if _, err := exec.LookPath(c); err == nil {
-				chromeapp = c
-				break
-			}
-		}
-
-	case "windows":
-	}
-
-	if chromeapp != "" {
-		if chromeapp == "headless_shell" {
-			chromeapp += " --no-sandbox"
-		} else {
-			chromeapp += " --headless"
-		}
-
-		chromeapp += " --remote-debugging-port=9222 --no-default-browser-check --no-first-run --hide-scrollbars --bwsi --disable-gpu"
-
-		if dir, err := ioutil.TempDir("", "gdpr_cookie"); err == nil {
-			defer func() {
-				_ = os.RemoveAll(dir)
-			}()
-			chromeapp += " --user-data-dir="
-			chromeapp += dir
-		}
-
-		chromeapp += " about:blank"
-	}
-
-	flag.StringVar(&cmd, "cmd", chromeapp, "command to execute to start the browser")
+	flag.StringVar(&cmd, "cmd", "", "command to execute to start the browser")
 	flag.BoolVar(&headless, "headless", false, "headless mode")
-	flag.StringVar(&port, "port", "localhost:9222", "Chrome remote debugger port")
+	flag.IntVar(&port, "port", 9222, "Chrome remote debugger port")
 	flag.BoolVar(&version, "version", false, "display remote devtools version")
 	flag.BoolVar(&verbose, "verbose", false, "verbose logging")
 	flag.BoolVar(&outputJSON, "json", false, "output as json")
@@ -118,69 +60,63 @@ func main() {
 		headless = true
 	}
 
-	if cmd != "" {
-		if !headless {
-			cmd = strings.ReplaceAll(cmd, "--headless", "")
-		}
-
-		log.Println("start chrome debugger process")
-
-		parts := args.GetArgs(cmd)
-		cmdObj := exec.Command(parts[0], parts[1:]...)
-		if err := cmdObj.Start(); err != nil {
-			log.Fatalf("start chrome debugger failed: %v\n", err)
-			return
-		}
-
-		defer func() {
-			_ = cmdObj.Process.Signal(syscall.SIGTERM)
-			_ = cmdObj.Wait()
-		}()
-	}
-
-	var (
-		remote *godet.RemoteDebugger
-		err    error
-	)
-
-	for i := 0; i < 10; i++ {
-		if i > 0 {
-			time.Sleep(500 * time.Millisecond)
-		}
-
-		remote, err = godet.Connect(port, verbose)
-		if err == nil {
-			break
-		}
-
-		log.Println("connect", err)
-	}
-
-	if err != nil {
-		log.Printf("cannot connect to browser: %v\n", err)
+	if !version && flag.NArg() == 0 {
+		log.Fatalf("site to scan must be provided")
 		return
 	}
 
-	defer func() {
-		remote.CloseBrowser()
-		_ = remote.Close()
-	}()
+	t := parser.NewTask(&parser.TaskConfig{
+		Timeout:           timeout,
+		WaitAfterPageLoad: waitAfterPageLoad,
+		Verbose:           verbose,
+		ChromeApp:         cmd,
+		DebuggerPort:      port,
+		Headless:          headless,
+	})
 
-	v, err := remote.Version()
-	if err != nil {
-		log.Printf("cannot get debugger version: %v\n", err)
+	if err := t.Start(); err != nil {
+		log.Fatalf("start debugger failed: %v", err)
 		return
 	}
+
+	defer t.Cleanup()
 
 	if version {
-		pretty.PrettyPrint(v)
+		if v, err := t.Version(); err != nil {
+			log.Printf("get debugger version failed: %v", err)
+		} else {
+			pretty.PrettyPrint(v)
+		}
 		return
-	} else {
-		log.Printf("connected to %s with protocol version %s", v.Browser, v.ProtocolVersion)
 	}
 
-	if err = handleRequest(remote); err != nil {
+	if err := t.Parse(flag.Arg(0)); err != nil {
 		log.Printf("get cookie data failed: %v", err)
+		return
+	}
+
+	if outputJSON {
+		if jsonData, err := t.OutputJSON("", "  "); err != nil {
+			log.Printf("get json cookie data failed: %v", err)
+		} else {
+			fmt.Println(jsonData)
+		}
+		return
+	}
+
+	if outputHTML != "" {
+		if err := t.OutputHTML(outputHTML); err != nil {
+			log.Printf("get html cookie data report failed: %v", err)
+		}
+
+		return
+	}
+
+	if outputPDF != "" {
+		if err := t.OutputPDF(outputPDF); err != nil {
+			log.Printf("get pdf cookie data report failed: %v", err)
+		}
+
 		return
 	}
 }

@@ -14,15 +14,39 @@
  * limitations under the License.
  */
 
-package main
+package parser
 
 import (
 	"net/http"
+	"os/exec"
 	"sort"
 	"sync"
+	"time"
 
 	"github.com/raff/godet"
 )
+
+type TaskConfig struct {
+	Timeout           time.Duration
+	WaitAfterPageLoad time.Duration
+	Verbose           bool
+	ChromeApp         string
+	DebuggerPort      int
+	Headless          bool
+}
+
+type Task struct {
+	cfg        *TaskConfig
+	startTime  time.Time
+	remote     *godet.RemoteDebugger
+	reportData *reportData
+	userDir    string
+	debugger   *exec.Cmd
+}
+
+func NewTask(tc *TaskConfig) *Task {
+	return &Task{cfg: tc}
+}
 
 type record struct {
 	isRequest bool

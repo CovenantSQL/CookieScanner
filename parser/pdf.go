@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package main
+package parser
 
 import (
-	"github.com/pkg/errors"
-	"github.com/raff/godet"
 	"html/template"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/pkg/errors"
+	"github.com/raff/godet"
 )
 
 var (

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package main
+package parser
 
 import (
 	"fmt"
@@ -26,7 +26,7 @@ import (
 	"github.com/jmoiron/jsonq"
 )
 
-func parseHeaders(isRequest bool, headers ...map[string]interface{}) []*http.Cookie {
+func (t *Task) parseHeaders(isRequest bool, headers ...map[string]interface{}) []*http.Cookie {
 	if isRequest {
 		fakeReq := &http.Request{Header: http.Header{}}
 
@@ -72,7 +72,7 @@ func parseHeaders(isRequest bool, headers ...map[string]interface{}) []*http.Coo
 	}
 }
 
-func parseResponse(rc *recordCollector) (cookieCount int, resultData []*reportRecord, err error) {
+func (t *Task) parseResponse(rc *recordCollector) (cookieCount int, resultData []*reportRecord, err error) {
 	resp := rc.get()
 	var outputs []*outputRecord
 
@@ -92,7 +92,7 @@ func parseResponse(rc *recordCollector) (cookieCount int, resultData []*reportRe
 					if redirectResponse, _ := q.Object("redirectResponse"); redirectResponse != nil {
 						output.statusCode, _ = q.Int("redirectResponse", "status")
 						headers, _ := q.Object("redirectResponse", "headers")
-						output.setCookies = parseHeaders(false, headers)
+						output.setCookies = t.parseHeaders(false, headers)
 
 						// set cookie default domain using current document domain
 						if len(output.setCookies) > 0 {
@@ -110,7 +110,7 @@ func parseResponse(rc *recordCollector) (cookieCount int, resultData []*reportRe
 
 						// merge request headers
 						requestHeaders, _ := q.Object("redirectResponse", "requestHeaders")
-						output.usedCookies = parseHeaders(true, lastHeaders, requestHeaders)
+						output.usedCookies = t.parseHeaders(true, lastHeaders, requestHeaders)
 
 						// add this output
 						if len(output.usedCookies) > 0 || len(output.setCookies) > 0 {
@@ -124,7 +124,7 @@ func parseResponse(rc *recordCollector) (cookieCount int, resultData []*reportRe
 				output.url, _ = q.String("request", "url")
 				output.reqSeq = r.reqSeq
 				headers, _ := q.Object("request", "headers")
-				output.usedCookies = parseHeaders(true, headers)
+				output.usedCookies = t.parseHeaders(true, headers)
 				output.initiator, _ = q.String("initiator", "type")
 				output.source, _ = q.String("initiator", "url")
 				output.lineNo, _ = q.Int("initiator", "lineNumber")
@@ -132,7 +132,7 @@ func parseResponse(rc *recordCollector) (cookieCount int, resultData []*reportRe
 			} else {
 				output.statusCode, _ = q.Int("response", "status")
 				headers, _ := q.Object("response", "headers")
-				output.setCookies = parseHeaders(false, headers)
+				output.setCookies = t.parseHeaders(false, headers)
 
 				// set cookie default domain using current document domain
 				if len(output.setCookies) > 0 {
@@ -150,7 +150,7 @@ func parseResponse(rc *recordCollector) (cookieCount int, resultData []*reportRe
 
 				// parse request headers
 				requestHeaders, _ := q.Object("response", "requestHeaders")
-				output.usedCookies = parseHeaders(true, lastHeaders, requestHeaders)
+				output.usedCookies = t.parseHeaders(true, lastHeaders, requestHeaders)
 
 				// add this output
 				if len(output.usedCookies) > 0 || len(output.setCookies) > 0 {
@@ -215,7 +215,7 @@ func parseResponse(rc *recordCollector) (cookieCount int, resultData []*reportRe
 							return estimatedDuration(time.Second * time.Duration(maxAge))
 						}
 
-						return estimatedDuration(expiry.Sub(startTime))
+						return estimatedDuration(expiry.Sub(t.startTime))
 					}(cookie.Expires, cookie.MaxAge),
 					MaxAge:       cookie.MaxAge,
 					Secure:       cookie.Secure,
