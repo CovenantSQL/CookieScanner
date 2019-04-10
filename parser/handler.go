@@ -20,7 +20,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/url"
 	"os"
 	"os/exec"
@@ -32,6 +31,7 @@ import (
 	"github.com/gobs/args"
 	"github.com/pkg/errors"
 	"github.com/raff/godet"
+	"github.com/sirupsen/logrus"
 )
 
 func (t *Task) Start() (err error) {
@@ -113,7 +113,7 @@ func (t *Task) Start() (err error) {
 			break
 		}
 
-		log.Printf("connect to debugger failed: %v", err)
+		logrus.WithError(err).Debug("connect to debugger failed")
 	}
 
 	return
@@ -188,7 +188,7 @@ func (t *Task) Parse(site string) (err error) {
 	pageWait := make(chan struct{}, 1)
 
 	time.AfterFunc(t.cfg.Timeout, func() {
-		log.Println("timeout triggered")
+		logrus.WithField("site", site).Debug("timeout triggered")
 		select {
 		case pageWait <- struct{}{}:
 		default:
@@ -197,7 +197,7 @@ func (t *Task) Parse(site string) (err error) {
 
 	// page stopped loading event
 	t.remote.CallbackEvent("Page.frameStoppedLoading", func(params godet.Params) {
-		log.Println("page frame stopped loading")
+		logrus.WithField("site", site).Debug("page frame stopped loading")
 		go func() {
 			time.Sleep(t.cfg.WaitAfterPageLoad)
 			select {
@@ -209,7 +209,7 @@ func (t *Task) Parse(site string) (err error) {
 
 	// page load event fired
 	t.remote.CallbackEvent("Page.loadEventFired", func(params godet.Params) {
-		log.Println("page load fired")
+		logrus.WithField("site", site).Debug("page load fired")
 		go func() {
 			time.Sleep(t.cfg.WaitAfterPageLoad)
 			select {
@@ -222,19 +222,20 @@ func (t *Task) Parse(site string) (err error) {
 	// debugger log
 	if t.cfg.Verbose {
 		t.remote.CallbackEvent("Log.entryAdded", func(params godet.Params) {
-			entry := params.Map("entry")
-			log.Println("LOG", entry["type"], entry["level"], entry["text"])
+			logrus.WithFields(logrus.Fields(params.Map("entry"))).WithField("site", site).Debug("debugger logged")
 		})
 
 		// console log
 		t.remote.CallbackEvent("Runtime.consoleAPICalled", func(params godet.Params) {
-			l := []interface{}{"CONSOLE", params["type"].(string)}
+			f := logrus.Fields{
+				"type": params["type"].(string),
+			}
 
 			for _, a := range params["args"].([]interface{}) {
 				arg := a.(map[string]interface{})
 
 				if arg["value"] != nil {
-					l = append(l, arg["value"])
+					f["value"] = arg["value"]
 				} else if arg["preview"] != nil {
 					arg := arg["preview"].(map[string]interface{})
 
@@ -254,14 +255,14 @@ func (t *Task) Parse(site string) (err error) {
 					}
 
 					v += "}"
-					l = append(l, v)
+					f["desc"] = v
 				} else {
-					l = append(l, arg["type"].(string))
+					f["type"] = arg["type"].(string)
 				}
 
 			}
 
-			log.Println(l...)
+			logrus.WithFields(f).Debug("debugger console logged")
 		})
 	}
 
@@ -303,14 +304,19 @@ func (t *Task) Parse(site string) (err error) {
 	return
 }
 
-func (t *Task) OutputJSON(prefix string, indent string) (str string, err error) {
-	jsonBlob, err := json.MarshalIndent(t.reportData, prefix, indent)
+func (t *Task) OutputJSON(pretty bool) (str string, err error) {
+	var jsonBlob []byte
+	if pretty {
+		jsonBlob, err = json.MarshalIndent(t.reportData, "", "  ")
+	} else {
+		jsonBlob, err = json.Marshal(t.reportData)
+	}
 	str = string(jsonBlob)
 	return
 }
 
-func (t *Task) OutputHTML(filename string) (err error) {
-	return outputAsHTML(t.reportData, filename)
+func (t *Task) OutputHTML() (str string, err error) {
+	return outputAsHTML(t.reportData)
 }
 
 func (t *Task) OutputPDF(filename string) (err error) {
@@ -319,15 +325,19 @@ func (t *Task) OutputPDF(filename string) (err error) {
 		return
 	}
 
-	_ = f.Close()
 	tempHTML := f.Name()
 	defer func() {
 		_ = os.Remove(tempHTML)
 	}()
 
-	if err = outputAsHTML(t.reportData, tempHTML); err != nil {
+	htmlData, err := outputAsHTML(t.reportData)
+	if err != nil {
 		return
 	}
+
+	_, _ = f.WriteString(htmlData)
+	_ = f.Sync()
+	_ = f.Close()
 
 	err = outputAsPDF(t.remote, tempHTML, filename)
 

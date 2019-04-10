@@ -19,22 +19,20 @@ package version
 import (
 	"github.com/CovenantSQL/CookieTester/cmd"
 	"github.com/CovenantSQL/CookieTester/parser"
+	"github.com/CovenantSQL/CookieTester/utils"
 	"github.com/gobs/pretty"
 	"github.com/pkg/errors"
-	"gopkg.in/alecthomas/kingpin.v2"
-	"net"
+	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
 func RegisterCommand(app *kingpin.Application, opts *cmd.CommonOptions) {
 	app.Command("version", "get debugger version").Action(func(context *kingpin.ParseContext) (err error) {
 		// random port
-		l, err := net.Listen("tcp", ":0")
+		port, err := utils.GetRandomPort()
 		if err != nil {
-			err = errors.Wrapf(err, "could not listen new ports")
+			err = errors.Wrapf(err, "get random port failed")
 			return
 		}
-		port := l.Addr().(*net.TCPAddr).Port
-		_ = l.Close()
 
 		t := parser.NewTask(&parser.TaskConfig{
 			Timeout:           opts.Timeout,

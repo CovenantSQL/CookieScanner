@@ -17,12 +17,11 @@
 package parser
 
 import (
+	"bytes"
 	"html/template"
-	"os"
 	"path/filepath"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/raff/godet"
 )
 
@@ -89,16 +88,10 @@ func init() {
 `))
 }
 
-func outputAsHTML(data *reportData, htmlFile string) (err error) {
-	f, err := os.OpenFile(htmlFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0755)
-	if err != nil {
-		err = errors.Wrap(err, "write html report failed")
-		return
-	}
-	defer func() {
-		_ = f.Close()
-	}()
-	err = reportTemplate.Execute(f, data)
+func outputAsHTML(data *reportData) (str string, err error) {
+	buf := new(bytes.Buffer)
+	err = reportTemplate.Execute(buf, data)
+	str = buf.String()
 	return
 }
 

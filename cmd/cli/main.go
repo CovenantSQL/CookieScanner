@@ -18,10 +18,12 @@ package cli
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/CovenantSQL/CookieTester/cmd"
 	"github.com/CovenantSQL/CookieTester/parser"
 	"github.com/pkg/errors"
-	"gopkg.in/alecthomas/kingpin.v2"
+	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
 var (
@@ -34,14 +36,14 @@ var (
 )
 
 func RegisterCommand(app *kingpin.Application, opts *cmd.CommonOptions) {
-	cli := app.Command("cli", "generate report for a single website")
-	cli.Flag("headless", "run chrome in headless mode").BoolVar(&headless)
-	cli.Flag("port", "chrome remote debugger listen port").Default("9222").IntVar(&port)
-	cli.Flag("json", "print report as json").BoolVar(&outputJSON)
-	cli.Flag("html", "save report as html").StringVar(&outputHTML)
-	cli.Flag("pdf", "save report as pdf").StringVar(&outputPDF)
-	cli.Arg("site", "site url").Required().StringVar(&site)
-	cli.Action(func(context *kingpin.ParseContext) error {
+	c := app.Command("cli", "generate report for a single website")
+	c.Flag("headless", "run chrome in headless mode").BoolVar(&headless)
+	c.Flag("port", "chrome remote debugger listen port").Default("9222").IntVar(&port)
+	c.Flag("json", "print report as json").BoolVar(&outputJSON)
+	c.Flag("html", "save report as html").StringVar(&outputHTML)
+	c.Flag("pdf", "save report as pdf").StringVar(&outputPDF)
+	c.Arg("site", "site url").Required().StringVar(&site)
+	c.Action(func(context *kingpin.ParseContext) error {
 		return handler(opts)
 	})
 }
@@ -77,7 +79,7 @@ func handler(opts *cmd.CommonOptions) (err error) {
 	}
 
 	if outputJSON {
-		if jsonData, err := t.OutputJSON("", " "); err == nil {
+		if jsonData, err := t.OutputJSON(true); err == nil {
 			fmt.Println(jsonData)
 		} else {
 			err = errors.Wrapf(err, "generate json report failed")
@@ -87,7 +89,19 @@ func handler(opts *cmd.CommonOptions) (err error) {
 	}
 
 	if outputHTML != "" {
-		err = errors.Wrapf(t.OutputHTML(outputHTML), "generate html report failed")
+		var htmlData string
+		if htmlData, err = t.OutputHTML(); err != nil {
+			err = errors.Wrapf(err, "generate html report failed")
+		} else {
+			var f *os.File
+			if f, err = os.OpenFile(outputHTML, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0755); err != nil {
+				err = errors.Wrap(err, "write html report failed")
+				return
+			}
+			_, _ = f.WriteString(htmlData)
+			_ = f.Sync()
+			_ = f.Close()
+		}
 		return
 	}
 

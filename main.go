@@ -22,13 +22,16 @@ import (
 
 	"github.com/CovenantSQL/CookieTester/cmd"
 	"github.com/CovenantSQL/CookieTester/cmd/cli"
+	"github.com/CovenantSQL/CookieTester/cmd/server"
 	"github.com/CovenantSQL/CookieTester/cmd/version"
+	"github.com/sirupsen/logrus"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
 var (
-	app     = kingpin.New("CookieTester", "website cookie usage report generator")
-	options cmd.CommonOptions
+	app      = kingpin.New("CookieTester", "website cookie usage report generator")
+	logLevel string
+	options  cmd.CommonOptions
 )
 
 func init() {
@@ -36,10 +39,21 @@ func init() {
 	app.Flag("verbose", "run debugger in verbose mode").BoolVar(&options.Verbose)
 	app.Flag("timeout", "timeout for a single cookie scan").Default(time.Minute.String()).DurationVar(&options.Timeout)
 	app.Flag("wait", "wait duration after page load in scan").DurationVar(&options.WaitAfterPageLoad)
+	app.Flag("log-level", "set log level").PreAction(func(context *kingpin.ParseContext) (err error) {
+		if logLevel != "" {
+			var lvl logrus.Level
+			lvl, err = logrus.ParseLevel(logLevel)
+			if err == nil {
+				logrus.SetLevel(lvl)
+			}
+		}
+
+		return
+	}).StringVar(&logLevel)
 
 	cli.RegisterCommand(app, &options)
 	version.RegisterCommand(app, &options)
-
+	server.RegisterCommand(app, &options)
 }
 
 func main() {
