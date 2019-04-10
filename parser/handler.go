@@ -35,6 +35,8 @@ import (
 )
 
 func (t *Task) Start() (err error) {
+	t.startTime = time.Now().UTC()
+
 	if t.cfg.ChromeApp == "" {
 		var chromeapp string
 
@@ -104,9 +106,7 @@ func (t *Task) Start() (err error) {
 
 	// connect debugger
 	for i := 0; i < 10; i++ {
-		if i > 0 {
-			time.Sleep(500 * time.Millisecond)
-		}
+		time.Sleep(500 * time.Millisecond)
 
 		t.remote, err = godet.Connect(fmt.Sprintf("localhost:%d", t.cfg.DebuggerPort), t.cfg.Verbose)
 		if err == nil {

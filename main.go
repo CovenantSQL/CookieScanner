@@ -17,106 +17,31 @@
 package main
 
 import (
-	"flag"
-	"fmt"
-	"log"
+	"os"
 	"time"
 
-	"github.com/CovenantSQL/CookieTester/parser"
-	"github.com/gobs/pretty"
+	"github.com/CovenantSQL/CookieTester/cmd"
+	"github.com/CovenantSQL/CookieTester/cmd/cli"
+	"github.com/CovenantSQL/CookieTester/cmd/version"
+	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
 var (
-	cmd               string
-	headless          bool
-	port              int
-	version           bool
-	verbose           bool
-	startTime         = time.Now().UTC()
-	outputJSON        bool
-	outputHTML        string
-	outputPDF         string
-	waitAfterPageLoad time.Duration
-	timeout           time.Duration
+	app     = kingpin.New("CookieTester", "website cookie usage report generator")
+	options cmd.CommonOptions
 )
 
 func init() {
-	flag.StringVar(&cmd, "cmd", "", "command to execute to start the browser")
-	flag.BoolVar(&headless, "headless", false, "headless mode")
-	flag.IntVar(&port, "port", 9222, "Chrome remote debugger port")
-	flag.BoolVar(&version, "version", false, "display remote devtools version")
-	flag.BoolVar(&verbose, "verbose", false, "verbose logging")
-	flag.BoolVar(&outputJSON, "json", false, "output as json")
-	flag.StringVar(&outputHTML, "html", "", "output as html (save with specified file name)")
-	flag.StringVar(&outputPDF, "pdf", "", "output as pdf (save with specified file name)")
-	flag.DurationVar(&waitAfterPageLoad, "wait", 0, "wait duration after page load (capturing ajax/deferred requests)")
-	flag.DurationVar(&timeout, "timeout", time.Minute, "timeout for cookie scan")
+	app.Flag("chrome", "chrome application to run as remote debugger").StringVar(&options.ChromeApp)
+	app.Flag("verbose", "run debugger in verbose mode").BoolVar(&options.Verbose)
+	app.Flag("timeout", "timeout for a single cookie scan").Default(time.Minute.String()).DurationVar(&options.Timeout)
+	app.Flag("wait", "wait duration after page load in scan").DurationVar(&options.WaitAfterPageLoad)
+
+	cli.RegisterCommand(app, &options)
+	version.RegisterCommand(app, &options)
+
 }
 
 func main() {
-	flag.Parse()
-
-	if outputPDF != "" {
-		headless = true
-	}
-
-	if !version && flag.NArg() == 0 {
-		log.Fatalf("site to scan must be provided")
-		return
-	}
-
-	t := parser.NewTask(&parser.TaskConfig{
-		Timeout:           timeout,
-		WaitAfterPageLoad: waitAfterPageLoad,
-		Verbose:           verbose,
-		ChromeApp:         cmd,
-		DebuggerPort:      port,
-		Headless:          headless,
-	})
-
-	if err := t.Start(); err != nil {
-		log.Fatalf("start debugger failed: %v", err)
-		return
-	}
-
-	defer t.Cleanup()
-
-	if version {
-		if v, err := t.Version(); err != nil {
-			log.Printf("get debugger version failed: %v", err)
-		} else {
-			pretty.PrettyPrint(v)
-		}
-		return
-	}
-
-	if err := t.Parse(flag.Arg(0)); err != nil {
-		log.Printf("get cookie data failed: %v", err)
-		return
-	}
-
-	if outputJSON {
-		if jsonData, err := t.OutputJSON("", "  "); err != nil {
-			log.Printf("get json cookie data failed: %v", err)
-		} else {
-			fmt.Println(jsonData)
-		}
-		return
-	}
-
-	if outputHTML != "" {
-		if err := t.OutputHTML(outputHTML); err != nil {
-			log.Printf("get html cookie data report failed: %v", err)
-		}
-
-		return
-	}
-
-	if outputPDF != "" {
-		if err := t.OutputPDF(outputPDF); err != nil {
-			log.Printf("get pdf cookie data report failed: %v", err)
-		}
-
-		return
-	}
+	kingpin.MustParse(app.Parse(os.Args[1:]))
 }
