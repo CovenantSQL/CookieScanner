@@ -33,6 +33,8 @@ type reportCookieRecord struct {
 	Secure       bool
 	HttpOnly     bool
 	UsedRequests int
+	Category     string
+	Description  string
 }
 
 type reportRecord struct {

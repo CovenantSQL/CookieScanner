@@ -16,11 +16,17 @@
 
 package cmd
 
-import "time"
+import (
+	"time"
+
+	"github.com/CovenantSQL/CookieTester/parser"
+)
 
 type CommonOptions struct {
 	ChromeApp         string
 	Verbose           bool
 	Timeout           time.Duration
 	WaitAfterPageLoad time.Duration
+	ClassifierDB      string
+	ClassifierHandler *parser.Classifier
 }

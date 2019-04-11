@@ -33,6 +33,7 @@ type TaskConfig struct {
 	ChromeApp         string
 	DebuggerPort      int
 	Headless          bool
+	Classifier        *Classifier
 }
 
 type Task struct {

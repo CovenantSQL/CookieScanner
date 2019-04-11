@@ -75,6 +75,14 @@ func init() {
 		<dd class="col-sm-10">{{if ne $r.MimeType ""}}{{$r.MimeType}}{{else}}-{{end}}</dd>
 		<dt class="col-sm-2">Used&nbsp;Requests</dt>
 		<dd class="col-sm-10">{{$c.UsedRequests}}</dd>
+		{{if ne $c.Category "" }}
+		<dt class="col-sm-2">Category</dt>
+		<dd class="col-sm-10">{{$c.Category}}</dt>
+		{{end}}
+		{{if ne $c.Description "" }}
+		<dt class="col-sm-2">Description</dt>
+		<dd class="col-sm-10">{{$c.Description}}</dd>
+		{{end}}
 	</dl>
 	{{else}}
 	<div class="row">

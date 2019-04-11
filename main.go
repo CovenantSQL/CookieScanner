@@ -24,6 +24,7 @@ import (
 	"github.com/CovenantSQL/CookieTester/cmd/cli"
 	"github.com/CovenantSQL/CookieTester/cmd/server"
 	"github.com/CovenantSQL/CookieTester/cmd/version"
+	"github.com/CovenantSQL/CookieTester/parser"
 	"github.com/sirupsen/logrus"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
@@ -37,23 +38,39 @@ var (
 func init() {
 	app.Flag("chrome", "chrome application to run as remote debugger").StringVar(&options.ChromeApp)
 	app.Flag("verbose", "run debugger in verbose mode").BoolVar(&options.Verbose)
-	app.Flag("timeout", "timeout for a single cookie scan").Default(time.Minute.String()).DurationVar(&options.Timeout)
+	app.Flag("timeout", "timeout for a single cookie scan").Default(time.Minute.String()).
+		DurationVar(&options.Timeout)
 	app.Flag("wait", "wait duration after page load in scan").DurationVar(&options.WaitAfterPageLoad)
-	app.Flag("log-level", "set log level").PreAction(func(context *kingpin.ParseContext) (err error) {
-		if logLevel != "" {
-			var lvl logrus.Level
-			lvl, err = logrus.ParseLevel(logLevel)
-			if err == nil {
-				logrus.SetLevel(lvl)
-			}
-		}
-
-		return
-	}).StringVar(&logLevel)
+	app.Flag("classifier", "classifier database for cookie report").
+		PreAction(loadCookieClassifier).StringVar(&options.ClassifierDB)
+	app.Flag("log-level", "set log level").PreAction(setLogLevel).StringVar(&logLevel)
 
 	cli.RegisterCommand(app, &options)
 	version.RegisterCommand(app, &options)
 	server.RegisterCommand(app, &options)
+}
+
+func loadCookieClassifier(context *kingpin.ParseContext) (err error) {
+	if options.ClassifierDB == "" {
+		return
+	}
+
+	// load cookie classifier database
+	options.ClassifierHandler, err = parser.NewClassifier(options.ClassifierDB)
+
+	return
+}
+
+func setLogLevel(context *kingpin.ParseContext) (err error) {
+	if logLevel != "" {
+		var lvl logrus.Level
+		lvl, err = logrus.ParseLevel(logLevel)
+		if err == nil {
+			logrus.SetLevel(lvl)
+		}
+	}
+
+	return
 }
 
 func main() {

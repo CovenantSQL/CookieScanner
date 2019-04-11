@@ -205,7 +205,7 @@ func (t *Task) parseResponse(rc *recordCollector) (cookieCount int, resultData [
 					r = reportRecords[idx]
 				}
 
-				r.Cookies = append(r.Cookies, &reportCookieRecord{
+				cData := &reportCookieRecord{
 					Name:    cookie.Name,
 					Path:    cookie.Path,
 					Domain:  cookie.Domain,
@@ -221,7 +221,14 @@ func (t *Task) parseResponse(rc *recordCollector) (cookieCount int, resultData [
 					Secure:       cookie.Secure,
 					HttpOnly:     cookie.HttpOnly,
 					UsedRequests: cookieUsedCount[c],
-				})
+				}
+
+				// load cookie classification data, ignore and query errors
+				if t.cfg.Classifier != nil {
+					cData.Category, cData.Description, _ = t.cfg.Classifier.GetCookieDetail(cookie.Name)
+				}
+
+				r.Cookies = append(r.Cookies, cData)
 
 				break
 			}

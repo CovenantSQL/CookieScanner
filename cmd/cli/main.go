@@ -64,6 +64,7 @@ func handler(opts *cmd.CommonOptions) (err error) {
 		ChromeApp:         opts.ChromeApp,
 		DebuggerPort:      port,
 		Headless:          headless,
+		Classifier:        opts.ClassifierHandler,
 	})
 
 	if err = t.Start(); err != nil {

@@ -219,6 +219,7 @@ func analyzeFunc(opts *cmd.CommonOptions) http.HandlerFunc {
 			ChromeApp:         opts.ChromeApp,
 			DebuggerPort:      port,
 			Headless:          true,
+			Classifier:        opts.ClassifierHandler,
 		})
 
 		if err = t.Start(); err != nil {
