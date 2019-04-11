@@ -2,6 +2,65 @@
 
 
 [[projects]]
+  digest = "1:07fddb45af6a7b56fbdb2f1d59e5595d46c1f2a1af2b196c2d2bdf57f202f9ef"
+  name = "github.com/CovenantSQL/CovenantSQL"
+  packages = [
+    "blockproducer",
+    "blockproducer/interfaces",
+    "client",
+    "conf",
+    "consistent",
+    "crypto",
+    "crypto/asymmetric",
+    "crypto/etls",
+    "crypto/hash",
+    "crypto/kms",
+    "crypto/secp256k1",
+    "crypto/symmetric",
+    "crypto/verifier",
+    "merkle",
+    "pow/cpuminer",
+    "proto",
+    "route",
+    "rpc",
+    "storage",
+    "twopc",
+    "types",
+    "utils",
+    "utils/log",
+    "utils/trace",
+    "xenomint/interfaces",
+    "xenomint/sqlite",
+  ]
+  pruneopts = "UT"
+  revision = "48fff30e1222e62a5faed992928aa02f3ca33e23"
+  version = "v0.5.0"
+
+[[projects]]
+  digest = "1:341f9de25b320f45124840fa084aa804a6659cfeae2ea93a45424fd73f9d7da5"
+  name = "github.com/CovenantSQL/HashStablePack"
+  packages = ["marshalhash"]
+  pruneopts = "UT"
+  revision = "6ae9d78bb97f20c0dbbdb74485974242bbbbdad5"
+  version = "v2.0.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:b8201c4d972fe3856d4bb2f97e6c53a558d90849f145a55f1028bedfe1929103"
+  name = "github.com/CovenantSQL/beacon"
+  packages = ["ipv6"]
+  pruneopts = "UT"
+  revision = "9f84f37adc0c8ead41f8a1135bdedfd86403fb8b"
+
+[[projects]]
+  digest = "1:3cafc6a5a1b8269605d9df4c6956d43d8011fc57f266ca6b9d04da6c09dee548"
+  name = "github.com/CovenantSQL/go-sqlite3-encrypt"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "25ecb14adfc7543176f7d85291ec7dba82c6f7e4"
+  version = "v1.9.0"
+
+[[projects]]
   branch = "master"
   digest = "1:315c5f2f60c76d89b871c73f9bd5fe689cad96597afd50fb9992228ef80bdd34"
   name = "github.com/alecthomas/template"
@@ -19,6 +78,22 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "2efee857e7cfd4f3d0138cc3cbb1b4966962b93a"
+
+[[projects]]
+  branch = "master"
+  digest = "1:093bf93a65962e8191e3e8cd8fc6c363f83d43caca9739c906531ba7210a9904"
+  name = "github.com/btcsuite/btcd"
+  packages = ["btcec"]
+  pruneopts = "UT"
+  revision = "9bfb2ca0346b57e246cc96fa31074df521175240"
+
+[[projects]]
+  branch = "master"
+  digest = "1:95f4fdfbc8d7723bd21e467aabe98d86f06d3e2557b1ba92bf9df8aea6706784"
+  name = "github.com/btcsuite/btcutil"
+  packages = ["base58"]
+  pruneopts = "UT"
+  revision = "3ac1210f4b38284536002486ef8a21ac54c14497"
 
 [[projects]]
   branch = "master"
@@ -77,6 +152,17 @@
   version = "v1.4.0"
 
 [[projects]]
+  digest = "1:d15ee511aa0f56baacc1eb4c6b922fa1c03b38413b6be18166b996d82a0156ea"
+  name = "github.com/hashicorp/golang-lru"
+  packages = [
+    ".",
+    "simplelru",
+  ]
+  pruneopts = "UT"
+  revision = "7087cb70de9f7a8bc0a10c375cb0d2280a8edf9c"
+  version = "v0.5.1"
+
+[[projects]]
   branch = "master"
   digest = "1:438016f7d4af8e5a7010b6d0705b267a7607ddc0decad051e83a9458c6b9a523"
   name = "github.com/jmoiron/jsonq"
@@ -99,6 +185,30 @@
   pruneopts = "UT"
   revision = "c7c4067b79cc51e6dfdcef5c702e74b1e0fa7c75"
   version = "v1.10.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:130cefe87d7eeefc824978dcb78e35672d4c49a11f25c153fbf0cfd952756fa3"
+  name = "github.com/minio/blake2b-simd"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3f5f724cb5b182a5c278d6d3d55b40e7f8c2efb4"
+
+[[projects]]
+  branch = "master"
+  digest = "1:84bd7f8a2e0bcd53ddc33c3b47c34c1fe340c8632cbe928f7f8ae10ec6ecdd62"
+  name = "github.com/mohae/deepcopy"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "c48cc78d482608239f6c4c92a4abd87eb8761c90"
+
+[[projects]]
+  digest = "1:5e73b34a27d827212102605789de00bd411b2e434812133c83935fe9897c75e1"
+  name = "github.com/philhofer/fwd"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "bb6d471dc95d4fe11e432687f8b70ff496cf3136"
+  version = "v1.0.0"
 
 [[projects]]
   digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
@@ -125,6 +235,38 @@
   version = "v1.4.1"
 
 [[projects]]
+  digest = "1:fb774e3bb85aaa1eba3f2b9fc232bb2b045adc977d33d24cf553e51aac955bfa"
+  name = "github.com/tchap/go-patricia"
+  packages = ["patricia"]
+  pruneopts = "UT"
+  revision = "a7f0089c6f496e8e70402f61733606daa326cac5"
+  version = "v2.3.0"
+
+[[projects]]
+  digest = "1:d0072748c62defde1ad99dde77f6ffce492a0e5aea9204077e497c7edfb86653"
+  name = "github.com/ugorji/go"
+  packages = ["codec"]
+  pruneopts = "UT"
+  revision = "2adff0894ba3bc2eeb9f9aea45fefd49802e1a13"
+  version = "v1.1.4"
+
+[[projects]]
+  digest = "1:507ac13e1e52769f3a2d5f8cb36de0d724a26b99d4ce8333de3d8b31ead7ff55"
+  name = "github.com/xtaci/smux"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "8a71918d00ec9d14824b26de2ebfea34c3b6190c"
+  version = "v1.2.2"
+
+[[projects]]
+  digest = "1:57540b8248e6f20effa6c417762fb22ba81da1c488160cdddabab9fae288d616"
+  name = "github.com/zserge/metric"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "0941fa223948f2050fcc7d13ee7369327faf6c11"
+  version = "v0.1.0"
+
+[[projects]]
   branch = "master"
   digest = "1:75515eedc0dc2cb0b40372008b616fa2841d831c63eedd403285ff286c593295"
   name = "golang.org/x/sync"
@@ -148,10 +290,19 @@
   revision = "947dcec5ba9c011838740e680966fd7087a71d0d"
   version = "v2.2.6"
 
+[[projects]]
+  digest = "1:4d2e5a73dc1500038e504a8d78b986630e3626dc027bc030ba5c75da257cdb96"
+  name = "gopkg.in/yaml.v2"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "51d6538a90f86fe93ac480b35f37b2be17fef232"
+  version = "v2.2.2"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/CovenantSQL/CovenantSQL/client",
     "github.com/gobs/args",
     "github.com/gobs/pretty",
     "github.com/gorilla/handlers",
