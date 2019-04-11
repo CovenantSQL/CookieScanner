@@ -25,36 +25,60 @@ $ go get github.com/CovenantSQL/CookieTester
 CookieTester is capable of geneating reports in `json/html/pdf` format.
 
 ```
-$ CookieTester -help
-Usage of ./CookieTester:
-  -cmd string
-    	command to execute to start the browser (default "\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" --headless --remote-debugging-port=9222 --no-default-browser-check --no-first-run --hide-scrollbars --bwsi --disable-gpu --user-data-dir=/var/folders/dz/qvdhk7t94mg68jsmd8ccv9x40000gn/T/gdpr_cookie228503997 about:blank")
-  -headless
-    	headless mode
-  -html string
-    	output as html (save with specified file name)
-  -json
-    	output as json
-  -pdf string
-    	output as pdf (save with specified file name)
-  -port string
-    	Chrome remote debugger port (default "localhost:9222")
-  -timeout duration
-    	timeout for cookie scan (default 1m0s)
-  -verbose
-    	verbose logging
-  -version
-    	display remote devtools version
-  -wait duration
-    	wait duration after page load (capturing ajax/deferred requests)
+$ CookieTester --help
+usage: CookieTester [<flags>] <command> [<args> ...]
+
+website cookie usage report generator
+
+Flags:
+  --help                 Show context-sensitive help (also try --help-long and --help-man).
+  --chrome=CHROME        chrome application to run as remote debugger
+  --verbose              run debugger in verbose mode
+  --timeout=1m0s         timeout for a single cookie scan
+  --wait=WAIT            wait duration after page load in scan
+  --log-level=LOG-LEVEL  set log level
+
+Commands:
+  help [<command>...]
+    Show help.
+
+  cli [<flags>] <site>
+    generate report for a single website
+
+  version
+    get debugger version
+
+  server [<flags>]
+    start a report generation server
+
+$ CookieTester cli --help
+usage: CookieTester cli [<flags>] <site>
+
+generate report for a single website
+
+Flags:
+  --help                 Show context-sensitive help (also try --help-long and --help-man).
+  --chrome=CHROME        chrome application to run as remote debugger
+  --verbose              run debugger in verbose mode
+  --timeout=1m0s         timeout for a single cookie scan
+  --wait=WAIT            wait duration after page load in scan
+  --log-level=LOG-LEVEL  set log level
+  --headless             run chrome in headless mode
+  --port=9222            chrome remote debugger listen port
+  --json                 print report as json
+  --html=HTML            save report as html
+  --pdf=PDF              save report as pdf
+
+Args:
+  <site>  site url
 ```
 
 ### Examples
 
-Generate HTML report for `www.google.com`.
+Generate HTML report for `www.google.com` using cli mode.
 
 ```shell
-$ CookieTester -headless -html google.html www.google.com
+$ CookieTester cli --headless --html google.html www.google.com
 ```
 
 Just wait for a while, you will found `google.html` showing results containing cookie descriptions like `NID`.
