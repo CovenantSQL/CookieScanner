@@ -16,7 +16,12 @@
 
 package parser
 
-import "time"
+import (
+	"encoding/json"
+	"io/ioutil"
+	"os"
+	"time"
+)
 
 type reportCookieRecord struct {
 	Name         string
@@ -46,4 +51,44 @@ type reportData struct {
 	ScanURL     string
 	CookieCount int
 	Records     []*reportRecord
+}
+
+func (t *Task) OutputJSON(pretty bool) (str string, err error) {
+	var jsonBlob []byte
+	if pretty {
+		jsonBlob, err = json.MarshalIndent(t.reportData, "", "  ")
+	} else {
+		jsonBlob, err = json.Marshal(t.reportData)
+	}
+	str = string(jsonBlob)
+	return
+}
+
+func (t *Task) OutputHTML() (str string, err error) {
+	return outputAsHTML(t.reportData)
+}
+
+func (t *Task) OutputPDF(filename string) (err error) {
+	var f *os.File
+	if f, err = ioutil.TempFile("", "gdpr_cookie*.html"); err != nil {
+		return
+	}
+
+	tempHTML := f.Name()
+	defer func() {
+		_ = os.Remove(tempHTML)
+	}()
+
+	htmlData, err := outputAsHTML(t.reportData)
+	if err != nil {
+		return
+	}
+
+	_, _ = f.WriteString(htmlData)
+	_ = f.Sync()
+	_ = f.Close()
+
+	err = outputAsPDF(t.remote, tempHTML, filename)
+
+	return
 }
