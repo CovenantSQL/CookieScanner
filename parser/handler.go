@@ -92,7 +92,7 @@ func (t *Task) Start() (err error) {
 
 	// start debugger
 	if !t.cfg.Headless {
-		t.cfg.ChromeApp = strings.ReplaceAll(t.cfg.ChromeApp, "--headless", "")
+		t.cfg.ChromeApp = strings.Replace(t.cfg.ChromeApp, "--headless", "", -1)
 	}
 
 	parts := args.GetArgs(t.cfg.ChromeApp)
