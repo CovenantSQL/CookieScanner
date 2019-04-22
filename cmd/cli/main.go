@@ -107,7 +107,7 @@ func handler(opts *cmd.CommonOptions) (err error) {
 	}
 
 	if outputPDF != "" {
-		err = errors.Wrapf(t.OutputPDF(outputPDF), "generate pdf report failed")
+		err = errors.Wrapf(t.OutputPDFToFile(outputPDF), "generate pdf report failed")
 		return
 	}
 

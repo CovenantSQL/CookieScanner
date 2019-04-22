@@ -36,33 +36,48 @@ import (
 	"github.com/sirupsen/logrus"
 	"golang.org/x/sync/semaphore"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
+	gomail "gopkg.in/gomail.v2"
 )
 
 const (
 	argSite   = "site"
 	argType   = "type"
 	argPretty = "pretty"
+	argTo     = "to"
 
-	typeJSON = "json"
-	typeHTML = "html"
-	typePDF  = "pdf"
+	typeJSON  = "json"
+	typeHTML  = "html"
+	typePDF   = "pdf"
+	typeEmail = "email"
 
 	contentTypeJSON = "application/json"
 	contentTypeHTML = "text/html"
 	contentTypePDF  = "application/pdf"
+
+	mailSubjectPrefix   = `CookieScan report for `
+	mailContentTemplate = `Your report for site %s is generated, please see the PDF attachment.`
 )
 
 var (
-	listenAddr  string
-	disablePDF  bool
-	disableHTML bool
-	disableJSON bool
+	listenAddr string
+
+	disablePDF   bool
+	disableHTML  bool
+	disableJSON  bool
+	disableEmail bool
+
 	versionOnce sync.Once
 	versionLock sync.RWMutex
 	versionInfo *godet.Version
 
 	maxInflightScan int
 	inflightSem     *semaphore.Weighted
+
+	mailServer   string
+	mailPort     int
+	mailUser     string
+	mailPassword string
+	mailFrom     string
 )
 
 func jsonContentType(next http.Handler) http.Handler {
@@ -114,6 +129,12 @@ func RegisterCommand(app *kingpin.Application, opts *cmd.CommonOptions) {
 	c.Flag("disable-json", "disable json output support").BoolVar(&disableJSON)
 	c.Flag("disable-html", "disable html output support").BoolVar(&disableHTML)
 	c.Flag("disable-pdf", "disable pdf output support").BoolVar(&disablePDF)
+	c.Flag("disable-email", "disable htm output support").BoolVar(&disableEmail)
+	c.Flag("mail-server", "mail server hostname").StringVar(&mailServer)
+	c.Flag("mail-port", "mail server port").IntVar(&mailPort)
+	c.Flag("mail-user", "mail login user").StringVar(&mailUser)
+	c.Flag("mail-password", "mail login password").StringVar(&mailPassword)
+	c.Flag("mail-from", "mail sender from address").StringVar(&mailFrom)
 	c.Action(func(context *kingpin.ParseContext) error {
 		return handler(opts)
 	})
@@ -192,6 +213,11 @@ func analyzeFunc(opts *cmd.CommonOptions) http.HandlerFunc {
 				sendResponse(http.StatusBadRequest, false, "pdf report is disabled", nil, rw)
 				return
 			}
+		case typeEmail:
+			if disableEmail {
+				sendResponse(http.StatusBadGateway, false, "email report is disabled", nil, rw)
+				return
+			}
 		default:
 			sendResponse(http.StatusBadRequest, false, "invalid report type", nil, rw)
 			return
@@ -261,8 +287,32 @@ func analyzeFunc(opts *cmd.CommonOptions) http.HandlerFunc {
 			rw.WriteHeader(http.StatusOK)
 			_, _ = rw.Write([]byte(htmlData))
 		case typePDF:
+			pdfBytes, err := t.OutputPDF()
+			if err != nil {
+				sendResponse(http.StatusInternalServerError, false, err, nil, rw)
+				return
+			}
+
+			rw.Header().Set("Content-Type", contentTypePDF)
+			rw.WriteHeader(http.StatusOK)
+			_, _ = rw.Write(pdfBytes)
+		case typeEmail:
+			// send email
+			mailTo := r.FormValue(argTo)
+
+			if mailServer == "" || mailPort == 0 || mailFrom == "" {
+				sendResponse(http.StatusInternalServerError, false, "email setting not provided", nil, rw)
+				return
+			}
+
+			if mailTo == "" {
+				sendResponse(http.StatusBadRequest, false, "mail to address not provided", nil, rw)
+				return
+			}
+
 			var f *os.File
-			if f, err = ioutil.TempFile("", "gdpr_cookie*.pdf"); err != nil {
+			if f, err = ioutil.TempFile("", "cookie_scan_*.pdf"); err != nil {
+				sendResponse(http.StatusInternalServerError, false, err, nil, rw)
 				return
 			}
 
@@ -273,20 +323,27 @@ func analyzeFunc(opts *cmd.CommonOptions) http.HandlerFunc {
 				_ = os.Remove(tempPDF)
 			}()
 
-			if err = t.OutputPDF(tempPDF); err != nil {
+			if err = t.OutputPDFToFile(tempPDF); err != nil {
 				sendResponse(http.StatusInternalServerError, false, err, nil, rw)
 				return
 			}
 
-			pdfBytes, err := ioutil.ReadFile(tempPDF)
-			if err != nil {
+			d := gomail.NewPlainDialer(mailServer, mailPort, mailUser, mailPassword)
+			m := gomail.NewMessage()
+			m.SetHeader("From", mailFrom)
+			m.SetAddressHeader("To", mailTo, mailTo)
+			m.SetHeader("Subject", mailSubjectPrefix+site)
+			m.SetBody("text/html", fmt.Sprintf(mailContentTemplate, site))
+			m.Attach(tempPDF, gomail.SetHeader(map[string][]string{"Content-Type": {contentTypePDF}}))
+
+			defer m.Reset()
+
+			if err = d.DialAndSend(m); err != nil {
 				sendResponse(http.StatusInternalServerError, false, err, nil, rw)
 				return
 			}
 
-			rw.Header().Set("Content-Type", contentTypePDF)
-			rw.WriteHeader(http.StatusOK)
-			_, _ = rw.Write(pdfBytes)
+			sendResponse(http.StatusOK, true, nil, nil, rw)
 		}
 	}
 }

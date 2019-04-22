@@ -70,7 +70,29 @@ func (t *Task) OutputHTML() (str string, err error) {
 	return outputAsHTML(t.reportData)
 }
 
-func (t *Task) OutputPDF(filename string) (err error) {
+func (t *Task) OutputPDF() (blob []byte, err error) {
+	var f *os.File
+	if f, err = ioutil.TempFile("", "gdpr_cookie*.pdf"); err != nil {
+		return
+	}
+
+	tempPDF := f.Name()
+	_ = f.Close()
+
+	defer func() {
+		_ = os.Remove(tempPDF)
+	}()
+
+	if err = t.OutputPDFToFile(tempPDF); err != nil {
+		return
+	}
+
+	blob, err = ioutil.ReadFile(tempPDF)
+
+	return
+}
+
+func (t *Task) OutputPDFToFile(filename string) (err error) {
 	var f *os.File
 	if f, err = ioutil.TempFile("", "gdpr_cookie*.html"); err != nil {
 		return
