@@ -21,7 +21,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/CovenantSQL/CovenantSQL/client"
+	//"github.com/CovenantSQL/CovenantSQL/client"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/pkg/errors"
 )
@@ -40,16 +40,16 @@ func NewClassifier(dsn string) (c *Classifier, err error) {
 	c = &Classifier{}
 
 	switch strings.ToLower(u.Scheme) {
-	case "covenantsql", "cql":
-		queries := u.Query()
-		cfg := queries.Get("config")
-		passwd := queries.Get("password")
-		if cfg != "" {
-			if err = client.Init(cfg, []byte(passwd)); err != nil {
-				return
-			}
-		}
-		c.db, err = sql.Open("covenantsql", dsn)
+	//case "covenantsql", "cql":
+	//	queries := u.Query()
+	//	cfg := queries.Get("config")
+	//	passwd := queries.Get("password")
+	//	if cfg != "" {
+	//		if err = client.Init(cfg, []byte(passwd)); err != nil {
+	//			return
+	//		}
+	//	}
+	//	c.db, err = sql.Open("covenantsql", dsn)
 	case "sqlite3", "sqlite":
 		c.db, err = sql.Open("sqlite3", "file:"+strings.TrimPrefix(dsn, u.Scheme+"://"))
 	default:

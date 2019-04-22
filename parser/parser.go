@@ -18,12 +18,14 @@ package parser
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
 
 	"github.com/jmoiron/jsonq"
+	"github.com/pkg/errors"
 )
 
 func (t *Task) parseHeaders(isRequest bool, headers ...map[string]interface{}) []*http.Cookie {
@@ -182,55 +184,102 @@ func (t *Task) parseResponse(rc *recordCollector) (cookieCount int, resultData [
 		}
 	}
 
+	// load all cookies from browser api
+	allCookies, err := t.remote.GetAllCookies()
+	if err != nil {
+		err = errors.Wrapf(err, "get all cookies from debugger failed")
+		return
+	}
+
+	for idx, cookie := range allCookies {
+		if _, ok := cookieSeqMap[cookie.Name]; !ok {
+			// cookie plant by scripts
+			cookieSeqMap[cookie.Name] = -idx - 1
+		}
+	}
+
 	cookieCount = len(cookieSeqMap)
 
 	for c, idx := range cookieSeqMap {
-		for _, cookie := range outputs[idx].setCookies {
-			if cookie.Name == c {
-				var (
-					r  *reportRecord
-					ok bool
-				)
-				if r, ok = reportRecords[idx]; !ok {
-					reportRecords[idx] = &reportRecord{
-						URL:        outputs[idx].url,
-						RemoteAddr: outputs[idx].remoteAddr,
-						Status:     outputs[idx].statusCode,
-						MimeType:   outputs[idx].mimeType,
-						Initiator:  outputs[idx].initiator,
-						Source:     outputs[idx].source,
-						LineNo:     outputs[idx].lineNo,
-					}
+		if idx < 0 {
+			var (
+				r  *reportRecord
+				ok bool
+			)
 
-					r = reportRecords[idx]
-				}
+			if r, ok = reportRecords[-1]; !ok {
+				reportRecords[-1] = &reportRecord{}
+				r = reportRecords[-1]
+			}
 
-				cData := &reportCookieRecord{
-					Name:    cookie.Name,
-					Path:    cookie.Path,
-					Domain:  cookie.Domain,
-					Expires: cookie.Expires,
-					Expiry: func(expiry time.Time, maxAge int) string {
-						if maxAge > 0 {
-							return estimatedDuration(time.Second * time.Duration(maxAge))
+			cookie := allCookies[-idx-1]
+			expireSec, expireDec := math.Modf(cookie.Expires)
+			expireTime := time.Unix(int64(expireSec), int64(expireDec*1e9)).UTC()
+
+			cData := &reportCookieRecord{
+				Name:         cookie.Name,
+				Path:         cookie.Path,
+				Domain:       cookie.Domain,
+				Expires:      expireTime,
+				Expiry:       estimatedDuration(expireTime.Sub(t.startTime)),
+				Secure:       cookie.Secure,
+				HttpOnly:     cookie.HttpOnly,
+				UsedRequests: cookieUsedCount[c],
+			}
+
+			if t.cfg.Classifier != nil {
+				cData.Category, cData.Description, _ = t.cfg.Classifier.GetCookieDetail(cookie.Name)
+			}
+
+			r.Cookies = append(r.Cookies, cData)
+		} else {
+			for _, cookie := range outputs[idx].setCookies {
+				if cookie.Name == c {
+					var (
+						r  *reportRecord
+						ok bool
+					)
+					if r, ok = reportRecords[idx]; !ok {
+						reportRecords[idx] = &reportRecord{
+							URL:        outputs[idx].url,
+							RemoteAddr: outputs[idx].remoteAddr,
+							Status:     outputs[idx].statusCode,
+							MimeType:   outputs[idx].mimeType,
+							Initiator:  outputs[idx].initiator,
+							Source:     outputs[idx].source,
+							LineNo:     outputs[idx].lineNo,
 						}
 
-						return estimatedDuration(expiry.Sub(t.startTime))
-					}(cookie.Expires, cookie.MaxAge),
-					MaxAge:       cookie.MaxAge,
-					Secure:       cookie.Secure,
-					HttpOnly:     cookie.HttpOnly,
-					UsedRequests: cookieUsedCount[c],
+						r = reportRecords[idx]
+					}
+
+					cData := &reportCookieRecord{
+						Name:    cookie.Name,
+						Path:    cookie.Path,
+						Domain:  cookie.Domain,
+						Expires: cookie.Expires,
+						Expiry: func(expiry time.Time, maxAge int) string {
+							if maxAge > 0 {
+								return estimatedDuration(time.Second * time.Duration(maxAge))
+							}
+
+							return estimatedDuration(expiry.Sub(t.startTime))
+						}(cookie.Expires, cookie.MaxAge),
+						MaxAge:       cookie.MaxAge,
+						Secure:       cookie.Secure,
+						HttpOnly:     cookie.HttpOnly,
+						UsedRequests: cookieUsedCount[c],
+					}
+
+					// load cookie classification data, ignore and query errors
+					if t.cfg.Classifier != nil {
+						cData.Category, cData.Description, _ = t.cfg.Classifier.GetCookieDetail(cookie.Name)
+					}
+
+					r.Cookies = append(r.Cookies, cData)
+
+					break
 				}
-
-				// load cookie classification data, ignore and query errors
-				if t.cfg.Classifier != nil {
-					cData.Category, cData.Description, _ = t.cfg.Classifier.GetCookieDetail(cookie.Name)
-				}
-
-				r.Cookies = append(r.Cookies, cData)
-
-				break
 			}
 		}
 	}
