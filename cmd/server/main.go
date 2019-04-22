@@ -17,6 +17,7 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -44,6 +45,7 @@ const (
 	argType   = "type"
 	argPretty = "pretty"
 	argTo     = "to"
+	argAsync  = "async"
 
 	typeJSON  = "json"
 	typeHTML  = "html"
@@ -186,11 +188,110 @@ func getVersionFunc(opts *cmd.CommonOptions) http.HandlerFunc {
 	}
 }
 
+func asyncEmailReport(opts *cmd.CommonOptions, site string, mailTo string) {
+	if maxInflightScan > 0 {
+		if err := inflightSem.Acquire(context.Background(), 1); err != nil {
+			logrus.WithFields(logrus.Fields{
+				"site": site,
+				"to":   mailTo,
+			}).WithError(err).Error("wait for email report")
+			return
+		}
+
+		defer inflightSem.Release(1)
+	}
+
+	port, err := utils.GetRandomPort()
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"site": site,
+			"to":   mailTo,
+		}).WithError(err).Error("start chrome task with random debugger port failed")
+		return
+	}
+
+	t := parser.NewTask(&parser.TaskConfig{
+		Timeout:           opts.Timeout,
+		WaitAfterPageLoad: opts.WaitAfterPageLoad,
+		Verbose:           opts.Verbose,
+		ChromeApp:         opts.ChromeApp,
+		DebuggerPort:      port,
+		Headless:          true,
+		Classifier:        opts.ClassifierHandler,
+	})
+
+	if err = t.Start(); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"site": site,
+			"to":   mailTo,
+		}).WithError(err).Error("start chrome task failed")
+		return
+	}
+
+	defer t.Cleanup()
+
+	if err = t.Parse(site); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"site": site,
+			"to":   mailTo,
+		}).WithError(err).Error("load and parse website failed")
+		return
+	}
+
+	var f *os.File
+	if f, err = ioutil.TempFile("", "cookie_scan_*.pdf"); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"site": site,
+			"to":   mailTo,
+		}).WithError(err).Error("create temp pdf scan file failed")
+		return
+	}
+
+	tempPDF := f.Name()
+	_ = f.Close()
+
+	defer func() {
+		_ = os.Remove(tempPDF)
+	}()
+
+	if err = t.OutputPDFToFile(tempPDF); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"site": site,
+			"to":   mailTo,
+		}).WithError(err).Error("generate pdf report failed")
+		return
+	}
+
+	d := gomail.NewPlainDialer(mailServer, mailPort, mailUser, mailPassword)
+	m := gomail.NewMessage()
+	m.SetHeader("From", mailFrom)
+	m.SetAddressHeader("To", mailTo, mailTo)
+	m.SetHeader("Subject", mailSubjectPrefix+site)
+	m.SetBody("text/html", fmt.Sprintf(mailContentTemplate, site))
+	m.Attach(tempPDF, gomail.SetHeader(map[string][]string{"Content-Type": {contentTypePDF}}))
+
+	defer m.Reset()
+
+	if err = d.DialAndSend(m); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"site": site,
+			"to":   mailTo,
+		}).WithError(err).Error("send email failed")
+		return
+	}
+
+	logrus.WithFields(logrus.Fields{
+		"site": site,
+		"to":   mailTo,
+	}).Info("generate report complete")
+}
+
 func analyzeFunc(opts *cmd.CommonOptions) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		// parse requests
 		site := r.FormValue(argSite)
 		reportType := r.FormValue(argType)
+		asyncReport := r.FormValue(argAsync)
 
 		if site == "" {
 			sendResponse(http.StatusBadRequest, false, "invalid website url", nil, rw)
@@ -216,6 +317,25 @@ func analyzeFunc(opts *cmd.CommonOptions) http.HandlerFunc {
 		case typeEmail:
 			if disableEmail {
 				sendResponse(http.StatusBadGateway, false, "email report is disabled", nil, rw)
+				return
+			}
+
+			mailTo := r.FormValue(argTo)
+
+			if mailServer == "" || mailPort == 0 || mailFrom == "" {
+				sendResponse(http.StatusInternalServerError, false, "email setting not provided", nil, rw)
+				return
+			}
+
+			if mailTo == "" {
+				sendResponse(http.StatusBadRequest, false, "mail to address not provided", nil, rw)
+				return
+			}
+
+			if asyncReport != "" {
+				// issue async report
+				go asyncEmailReport(opts, site, mailTo)
+				sendResponse(http.StatusOK, true, nil, nil, rw)
 				return
 			}
 		default:
@@ -299,16 +419,6 @@ func analyzeFunc(opts *cmd.CommonOptions) http.HandlerFunc {
 		case typeEmail:
 			// send email
 			mailTo := r.FormValue(argTo)
-
-			if mailServer == "" || mailPort == 0 || mailFrom == "" {
-				sendResponse(http.StatusInternalServerError, false, "email setting not provided", nil, rw)
-				return
-			}
-
-			if mailTo == "" {
-				sendResponse(http.StatusBadRequest, false, "mail to address not provided", nil, rw)
-				return
-			}
 
 			var f *os.File
 			if f, err = ioutil.TempFile("", "cookie_scan_*.pdf"); err != nil {
