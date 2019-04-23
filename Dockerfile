@@ -1,5 +1,5 @@
 # build stage
-FROM golang:alphine AS builder
+FROM golang:alpine AS builder
 WORKDIR /go/src/github.com/CovenantSQL/CookieTester
 COPY . .
 RUN CGO_ENABLED=1 GOOS=linux go install -ldflags '-linkmode external -extldflags -static'
