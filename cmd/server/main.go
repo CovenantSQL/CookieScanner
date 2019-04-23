@@ -71,6 +71,7 @@ var (
 	versionOnce sync.Once
 	versionLock sync.RWMutex
 	versionInfo *godet.Version
+	versionErr  error
 
 	maxInflightScan int
 	inflightSem     *semaphore.Weighted
@@ -145,6 +146,10 @@ func RegisterCommand(app *kingpin.Application, opts *cmd.CommonOptions) {
 func getVersionFunc(opts *cmd.CommonOptions) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		versionOnce.Do(func() {
+			var err error
+			defer func() {
+				versionErr = err
+			}()
 			port, err := utils.GetRandomPort()
 			if err != nil {
 				sendResponse(http.StatusInternalServerError, false, err, nil, rw)
@@ -182,7 +187,7 @@ func getVersionFunc(opts *cmd.CommonOptions) http.HandlerFunc {
 
 		if versionInfo != nil {
 			sendResponse(http.StatusOK, true, nil, versionInfo, rw)
-		} else {
+		} else if versionErr == nil {
 			sendResponse(http.StatusInternalServerError, false, "could not get server version", nil, rw)
 		}
 	}
