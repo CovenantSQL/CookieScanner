@@ -192,13 +192,14 @@ func (t *Task) Parse(site string) (err error) {
 
 	pageWait := make(chan struct{}, 1)
 
-	time.AfterFunc(t.cfg.Timeout, func() {
+	tm := time.AfterFunc(t.cfg.Timeout, func() {
 		logrus.WithField("site", site).Debug("timeout triggered")
 		select {
 		case pageWait <- struct{}{}:
 		default:
 		}
 	})
+	defer tm.Stop()
 
 	// page stopped loading event
 	t.remote.CallbackEvent("Page.frameStoppedLoading", func(params godet.Params) {
