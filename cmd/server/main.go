@@ -463,7 +463,7 @@ func analyzeFunc(opts *cmd.CommonOptions) http.HandlerFunc {
 }
 
 func handler(opts *cmd.CommonOptions) (err error) {
-	if disableJSON && disablePDF && disableHTML {
+	if disableJSON && disablePDF && disableHTML && disableEmail {
 		disableJSON = false
 	}
 
