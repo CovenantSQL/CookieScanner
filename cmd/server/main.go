@@ -26,6 +26,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/CovenantSQL/CookieTester/cmd"
 	"github.com/CovenantSQL/CookieTester/parser"
@@ -205,6 +206,8 @@ func asyncEmailReport(opts *cmd.CommonOptions, site string, mailTo string) {
 		defer inflightSem.Release(1)
 	}
 
+	startTime := time.Now()
+
 	port, err := utils.GetRandomPort()
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
@@ -285,8 +288,9 @@ func asyncEmailReport(opts *cmd.CommonOptions, site string, mailTo string) {
 	}
 
 	logrus.WithFields(logrus.Fields{
-		"site": site,
-		"to":   mailTo,
+		"site":    site,
+		"to":      mailTo,
+		"elapsed": time.Now().Sub(startTime).String(),
 	}).Info("generate report complete")
 }
 
