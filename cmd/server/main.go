@@ -152,7 +152,6 @@ func getVersionFunc(opts *cmd.CommonOptions) http.HandlerFunc {
 			}()
 			port, err := utils.GetRandomPort()
 			if err != nil {
-				sendResponse(http.StatusInternalServerError, false, err, nil, rw)
 				return
 			}
 
@@ -166,7 +165,6 @@ func getVersionFunc(opts *cmd.CommonOptions) http.HandlerFunc {
 			})
 
 			if err = t.Start(); err != nil {
-				sendResponse(http.StatusInternalServerError, false, err, nil, rw)
 				return
 			}
 
@@ -177,7 +175,6 @@ func getVersionFunc(opts *cmd.CommonOptions) http.HandlerFunc {
 			versionInfo, err = t.Version()
 
 			if err != nil {
-				sendResponse(http.StatusInternalServerError, false, err, nil, rw)
 				return
 			}
 		})
@@ -187,7 +184,9 @@ func getVersionFunc(opts *cmd.CommonOptions) http.HandlerFunc {
 
 		if versionInfo != nil {
 			sendResponse(http.StatusOK, true, nil, versionInfo, rw)
-		} else if versionErr == nil {
+		} else if versionErr != nil {
+			sendResponse(http.StatusInternalServerError, false, versionErr, nil, rw)
+		} else {
 			sendResponse(http.StatusInternalServerError, false, "could not get server version", nil, rw)
 		}
 	}
