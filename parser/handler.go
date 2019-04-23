@@ -102,7 +102,7 @@ func (t *Task) Start() (err error) {
 	}
 
 	parts := args.GetArgs(t.cfg.ChromeApp)
-	cmd := exec.Command(parts[0], parts[1:]...)
+	cmd := exec.Command("setsid", parts...)
 	if err = cmd.Start(); err != nil {
 		return
 	}
