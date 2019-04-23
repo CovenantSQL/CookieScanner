@@ -8,5 +8,5 @@ RUN CGO_ENABLED=1 GOOS=linux go install -ldflags '-linkmode external -extldflags
 FROM browserless/chrome:1.5.0-chrome-stable
 WORKDIR /app
 COPY --from=builder /go/bin/CookieTester /app/
-ENTRYPOINT ./CookieTester
+ENTRYPOINT ["./CookieTester", "server"]
 CMD []
