@@ -96,6 +96,11 @@ func (t *Task) Start() (err error) {
 		t.cfg.ChromeApp = strings.Replace(t.cfg.ChromeApp, "--headless", "", -1)
 	}
 
+	if t.cfg.ChromeApp == "" {
+		err = errors.New("no chrome application available")
+		return
+	}
+
 	parts := args.GetArgs(t.cfg.ChromeApp)
 	cmd := exec.Command(parts[0], parts[1:]...)
 	if err = cmd.Start(); err != nil {
