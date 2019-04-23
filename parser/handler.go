@@ -56,6 +56,7 @@ func (t *Task) Start() (err error) {
 			for _, c := range []string{
 				"headless_shell",
 				"chromium",
+				"chromium-browser",
 				"google-chrome-beta",
 				"google-chrome-unstable",
 				"google-chrome-stable"} {
