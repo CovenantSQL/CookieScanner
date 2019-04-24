@@ -17,6 +17,7 @@
 package parser
 
 import (
+	"encoding/base64"
 	"fmt"
 	"io/ioutil"
 	"net/url"
@@ -102,7 +103,7 @@ func (t *Task) Start() (err error) {
 	}
 
 	parts := args.GetArgs(t.cfg.ChromeApp)
-	cmd := exec.Command("setsid", parts...)
+	cmd := exec.Command(parts[0], parts[1:]...)
 	if err = cmd.Start(); err != nil {
 		return
 	}
@@ -305,6 +306,14 @@ func (t *Task) Parse(site string) (err error) {
 		ScanURL:     site,
 		CookieCount: cookieCount,
 		Records:     reportRecords,
+	}
+
+	// take snapshot of current page
+	screenShotImage, err := t.remote.CaptureScreenshot("png", 0, true)
+	if err == nil {
+		t.reportData.ScreenShotImage = base64.StdEncoding.EncodeToString(screenShotImage)
+	} else {
+		err = nil
 	}
 
 	return

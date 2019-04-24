@@ -35,9 +35,7 @@ type reportCookieRecord struct {
 	UsedRequests int
 	Category     string
 	Description  string
-}
 
-type reportRecord struct {
 	URL        string
 	RemoteAddr string
 	Status     int
@@ -45,14 +43,20 @@ type reportRecord struct {
 	Initiator  string
 	Source     string
 	LineNo     int
-	Cookies    []*reportCookieRecord
+}
+
+type reportRecord struct {
+	Category    string
+	Description string
+	Cookies     []*reportCookieRecord
 }
 
 type reportData struct {
-	ScanTime    time.Time
-	ScanURL     string
-	CookieCount int
-	Records     []*reportRecord
+	ScanTime        time.Time
+	ScanURL         string
+	CookieCount     int
+	ScreenShotImage string
+	Records         []*reportRecord
 }
 
 func (t *Task) OutputJSON(pretty bool) (str string, err error) {
@@ -72,28 +76,6 @@ func (t *Task) OutputHTML() (str string, err error) {
 
 func (t *Task) OutputPDF() (blob []byte, err error) {
 	var f *os.File
-	if f, err = ioutil.TempFile("", "gdpr_cookie*.pdf"); err != nil {
-		return
-	}
-
-	tempPDF := f.Name()
-	_ = f.Close()
-
-	defer func() {
-		_ = os.Remove(tempPDF)
-	}()
-
-	if err = t.OutputPDFToFile(tempPDF); err != nil {
-		return
-	}
-
-	blob, err = ioutil.ReadFile(tempPDF)
-
-	return
-}
-
-func (t *Task) OutputPDFToFile(filename string) (err error) {
-	var f *os.File
 	if f, err = ioutil.TempFile("", "gdpr_cookie*.html"); err != nil {
 		return
 	}
@@ -112,7 +94,16 @@ func (t *Task) OutputPDFToFile(filename string) (err error) {
 	_ = f.Sync()
 	_ = f.Close()
 
-	err = outputAsPDF(t.remote, tempHTML, filename)
+	return outputAsPDF(t.remote, tempHTML)
+}
+
+func (t *Task) OutputPDFToFile(filename string) (err error) {
+	bt, err := t.OutputPDF()
+	if err != nil {
+		return
+	}
+
+	err = ioutil.WriteFile(filename, bt, 0644)
 
 	return
 }

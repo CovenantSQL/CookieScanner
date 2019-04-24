@@ -170,7 +170,8 @@ func (t *Task) parseResponse(rc *recordCollector) (cookieCount int, resultData [
 	var (
 		cookieUsedCount = map[string]int{}
 		cookieSeqMap    = map[string]int{}
-		reportRecords   = map[int]*reportRecord{}
+		httpCookieMap   = map[string]*http.Cookie{}
+		reportRecords   = map[string]*reportRecord{}
 	)
 
 	for idx, output := range outputs {
@@ -180,8 +181,59 @@ func (t *Task) parseResponse(rc *recordCollector) (cookieCount int, resultData [
 		for _, c := range output.setCookies {
 			if i, ok := cookieSeqMap[c.Name]; !ok || outputs[i].reqSeq > output.reqSeq {
 				cookieSeqMap[c.Name] = idx
+				httpCookieMap[c.Name] = c
 			}
 		}
+	}
+
+	for c, idx := range cookieSeqMap {
+		var (
+			cookie     = httpCookieMap[c]
+			category   = ""
+			cookieDesc = ""
+			record     *reportRecord
+			ok         bool
+		)
+
+		if t.cfg.Classifier != nil {
+			category, cookieDesc, _ = t.cfg.Classifier.GetCookieDetail(cookie.Name)
+		}
+
+		if record, ok = reportRecords[category]; !ok {
+			record = &reportRecord{
+				Category: category,
+			}
+			reportRecords[category] = record
+		}
+
+		record.Cookies = append(record.Cookies, &reportCookieRecord{
+			Name:    cookie.Name,
+			Path:    cookie.Path,
+			Domain:  cookie.Domain,
+			Expires: cookie.Expires,
+			Expiry: func(expiry time.Time, maxAge int) string {
+				if maxAge > 0 {
+					return estimatedDuration(time.Second * time.Duration(maxAge))
+				}
+
+				return estimatedDuration(expiry.Sub(t.startTime))
+			}(cookie.Expires, cookie.MaxAge),
+			MaxAge:       cookie.MaxAge,
+			Secure:       cookie.Secure,
+			HttpOnly:     cookie.HttpOnly,
+			UsedRequests: cookieUsedCount[c],
+
+			Category:    category,
+			Description: cookieDesc,
+
+			URL:        outputs[idx].url,
+			RemoteAddr: outputs[idx].remoteAddr,
+			Status:     outputs[idx].statusCode,
+			MimeType:   outputs[idx].mimeType,
+			Initiator:  outputs[idx].initiator,
+			Source:     outputs[idx].source,
+			LineNo:     outputs[idx].lineNo,
+		})
 	}
 
 	// load all cookies from browser api
@@ -191,101 +243,64 @@ func (t *Task) parseResponse(rc *recordCollector) (cookieCount int, resultData [
 		return
 	}
 
-	for idx, cookie := range allCookies {
+	for _, cookie := range allCookies {
 		if _, ok := cookieSeqMap[cookie.Name]; !ok {
 			// cookie plant by scripts
-			cookieSeqMap[cookie.Name] = -idx - 1
+			var (
+				category   = ""
+				cookieDesc = ""
+				record     *reportRecord
+				ok         bool
+			)
+
+			if t.cfg.Classifier != nil {
+				category, cookieDesc, _ = t.cfg.Classifier.GetCookieDetail(cookie.Name)
+
+				if record, ok = reportRecords[category]; !ok {
+					record = &reportRecord{
+						Category: category,
+					}
+					reportRecords[category] = record
+				}
+
+				expireSec, expireDec := math.Modf(cookie.Expires)
+				expireTime := time.Unix(int64(expireSec), int64(expireDec*1e9)).UTC()
+
+				record.Cookies = append(record.Cookies, &reportCookieRecord{
+					Name:         cookie.Name,
+					Path:         cookie.Path,
+					Domain:       cookie.Domain,
+					Expires:      expireTime,
+					Expiry:       estimatedDuration(expireTime.Sub(t.startTime)),
+					Secure:       cookie.Secure,
+					HttpOnly:     cookie.HttpOnly,
+					UsedRequests: cookieUsedCount[cookie.Name],
+
+					Category:    category,
+					Description: cookieDesc,
+				})
+			}
 		}
 	}
 
 	cookieCount = len(cookieSeqMap)
+	hasUnclassified := false
 
-	for c, idx := range cookieSeqMap {
-		if idx < 0 {
-			var (
-				r  *reportRecord
-				ok bool
-			)
-
-			if r, ok = reportRecords[-1]; !ok {
-				reportRecords[-1] = &reportRecord{}
-				r = reportRecords[-1]
-			}
-
-			cookie := allCookies[-idx-1]
-			expireSec, expireDec := math.Modf(cookie.Expires)
-			expireTime := time.Unix(int64(expireSec), int64(expireDec*1e9)).UTC()
-
-			cData := &reportCookieRecord{
-				Name:         cookie.Name,
-				Path:         cookie.Path,
-				Domain:       cookie.Domain,
-				Expires:      expireTime,
-				Expiry:       estimatedDuration(expireTime.Sub(t.startTime)),
-				Secure:       cookie.Secure,
-				HttpOnly:     cookie.HttpOnly,
-				UsedRequests: cookieUsedCount[c],
-			}
-
-			if t.cfg.Classifier != nil {
-				cData.Category, cData.Description, _ = t.cfg.Classifier.GetCookieDetail(cookie.Name)
-			}
-
-			r.Cookies = append(r.Cookies, cData)
+	// sort unclassified cookies to the end
+	for c, record := range reportRecords {
+		if c != "" {
+			resultData = append(resultData, record)
 		} else {
-			for _, cookie := range outputs[idx].setCookies {
-				if cookie.Name == c {
-					var (
-						r  *reportRecord
-						ok bool
-					)
-					if r, ok = reportRecords[idx]; !ok {
-						reportRecords[idx] = &reportRecord{
-							URL:        outputs[idx].url,
-							RemoteAddr: outputs[idx].remoteAddr,
-							Status:     outputs[idx].statusCode,
-							MimeType:   outputs[idx].mimeType,
-							Initiator:  outputs[idx].initiator,
-							Source:     outputs[idx].source,
-							LineNo:     outputs[idx].lineNo,
-						}
-
-						r = reportRecords[idx]
-					}
-
-					cData := &reportCookieRecord{
-						Name:    cookie.Name,
-						Path:    cookie.Path,
-						Domain:  cookie.Domain,
-						Expires: cookie.Expires,
-						Expiry: func(expiry time.Time, maxAge int) string {
-							if maxAge > 0 {
-								return estimatedDuration(time.Second * time.Duration(maxAge))
-							}
-
-							return estimatedDuration(expiry.Sub(t.startTime))
-						}(cookie.Expires, cookie.MaxAge),
-						MaxAge:       cookie.MaxAge,
-						Secure:       cookie.Secure,
-						HttpOnly:     cookie.HttpOnly,
-						UsedRequests: cookieUsedCount[c],
-					}
-
-					// load cookie classification data, ignore and query errors
-					if t.cfg.Classifier != nil {
-						cData.Category, cData.Description, _ = t.cfg.Classifier.GetCookieDetail(cookie.Name)
-					}
-
-					r.Cookies = append(r.Cookies, cData)
-
-					break
-				}
-			}
+			hasUnclassified = true
 		}
 	}
 
-	for _, r := range reportRecords {
-		resultData = append(resultData, r)
+	if hasUnclassified {
+		for c, record := range reportRecords {
+			if c == "" {
+				resultData = append(resultData, record)
+			}
+		}
 	}
 
 	return
