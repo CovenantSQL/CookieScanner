@@ -2,6 +2,10 @@
 
 Cookie Tester is a simple utility to analyze website cookie status and generate reports for GDPR-compliance.
 
+### Online Demo
+
+Your can just try Cookie Tester on [gdprExpert.io](https://gdprexpert.io/)
+
 ### Installation
 
 Requires MacOS/Linux system.
