@@ -33,8 +33,6 @@
   name = "github.com/chromedp/chromedp"
   branch = "master"
 
-[prune]
-  go-tests = true
-  unused-packages = true
-
-
+[[override]]
+  name = "github.com/CovenantSQL/CovenantSQL"
+  branch = "develop"
