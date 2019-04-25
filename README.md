@@ -31,12 +31,14 @@ usage: CookieTester [<flags>] <command> [<args> ...]
 website cookie usage report generator
 
 Flags:
-  --help                 Show context-sensitive help (also try --help-long and --help-man).
-  --chrome=CHROME        chrome application to run as remote debugger
-  --verbose              run debugger in verbose mode
-  --timeout=1m0s         timeout for a single cookie scan
-  --wait=WAIT            wait duration after page load in scan
-  --log-level=LOG-LEVEL  set log level
+  --help                   Show context-sensitive help (also try --help-long
+                           and --help-man).
+  --chrome=CHROME          chrome application to run as remote debugger
+  --verbose                run debugger in verbose mode
+  --timeout=1m0s           timeout for a single cookie scan
+  --wait=WAIT              wait duration after page load in scan
+  --classifier=CLASSIFIER  classifier database for cookie report
+  --log-level=LOG-LEVEL    set log level
 
 Commands:
   help [<command>...]
@@ -57,17 +59,19 @@ usage: CookieTester cli [<flags>] <site>
 generate report for a single website
 
 Flags:
-  --help                 Show context-sensitive help (also try --help-long and --help-man).
-  --chrome=CHROME        chrome application to run as remote debugger
-  --verbose              run debugger in verbose mode
-  --timeout=1m0s         timeout for a single cookie scan
-  --wait=WAIT            wait duration after page load in scan
-  --log-level=LOG-LEVEL  set log level
-  --headless             run chrome in headless mode
-  --port=9222            chrome remote debugger listen port
-  --json                 print report as json
-  --html=HTML            save report as html
-  --pdf=PDF              save report as pdf
+  --help                   Show context-sensitive help (also try --help-long
+                           and --help-man).
+  --chrome=CHROME          chrome application to run as remote debugger
+  --verbose                run debugger in verbose mode
+  --timeout=1m0s           timeout for a single cookie scan
+  --wait=WAIT              wait duration after page load in scan
+  --classifier=CLASSIFIER  classifier database for cookie report
+  --log-level=LOG-LEVEL    set log level
+  --headless               run chrome in headless mode
+  --port=9222              chrome remote debugger listen port
+  --json                   print report as json
+  --html=HTML              save report as html
+  --pdf=PDF                save report as pdf
 
 Args:
   <site>  site url
@@ -78,7 +82,10 @@ Args:
 Generate HTML report for `covenantsql.io` using cli mode.
 
 ```shell
-$ CookieTester cli --headless --html cql.html covenantsql.io
+$ CookieTester cli \ 
+    --headless \
+    --classification covenantsql://050cdf3b860c699524bf6f6dce28c4f3e8282ac58b0e410eb340195c379adc3a?config=./config/config.yaml \
+    --html cql.html covenantsql.io
 ```
 
 Just wait for a while, you will found `cql.html` showing results like this:
