@@ -259,31 +259,31 @@ func (t *Task) parseResponse(rc *recordCollector) (cookieCount int, resultData [
 
 			if t.cfg.Classifier != nil {
 				category, cookieDesc, _ = t.cfg.Classifier.GetCookieDetail(cookie.Name)
-
-				if record, ok = reportRecords[category]; !ok {
-					record = &reportRecord{
-						Category: category,
-					}
-					reportRecords[category] = record
-				}
-
-				expireSec, expireDec := math.Modf(cookie.Expires)
-				expireTime := time.Unix(int64(expireSec), int64(expireDec*1e9)).UTC()
-
-				record.Cookies = append(record.Cookies, &reportCookieRecord{
-					Name:         cookie.Name,
-					Path:         cookie.Path,
-					Domain:       cookie.Domain,
-					Expires:      expireTime,
-					Expiry:       estimatedDuration(expireTime.Sub(t.startTime)),
-					Secure:       cookie.Secure,
-					HttpOnly:     cookie.HttpOnly,
-					UsedRequests: cookieUsedCount[cookie.Name],
-
-					Category:    category,
-					Description: cookieDesc,
-				})
 			}
+
+			if record, ok = reportRecords[category]; !ok {
+				record = &reportRecord{
+					Category: category,
+				}
+				reportRecords[category] = record
+			}
+
+			expireSec, expireDec := math.Modf(cookie.Expires)
+			expireTime := time.Unix(int64(expireSec), int64(expireDec*1e9)).UTC()
+
+			record.Cookies = append(record.Cookies, &reportCookieRecord{
+				Name:         cookie.Name,
+				Path:         cookie.Path,
+				Domain:       cookie.Domain,
+				Expires:      expireTime,
+				Expiry:       estimatedDuration(expireTime.Sub(t.startTime)),
+				Secure:       cookie.Secure,
+				HttpOnly:     cookie.HttpOnly,
+				UsedRequests: cookieUsedCount[cookie.Name],
+
+				Category:    category,
+				Description: cookieDesc,
+			})
 		}
 	}
 
