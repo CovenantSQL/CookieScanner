@@ -181,14 +181,6 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:8bbdb2b3dce59271877770d6fe7dcbb8362438fa7d2e1e1f688e4bf2aac72706"
-  name = "github.com/mattn/go-sqlite3"
-  packages = ["."]
-  pruneopts = ""
-  revision = "c7c4067b79cc51e6dfdcef5c702e74b1e0fa7c75"
-  version = "v1.10.0"
-
-[[projects]]
   branch = "master"
   digest = "1:c485395b7f2482c29d261f62e1bc2d263de703eb02a6dba83c62810981b5860f"
   name = "github.com/minio/blake2b-simd"
@@ -245,12 +237,12 @@
   version = "v2.3.0"
 
 [[projects]]
-  digest = "1:a1ca17cff1abec6d4ecdeb03c52338c559affd7f0b2474e928c162986da2d348"
+  digest = "1:2e7f653483e51243b6cd6de60ce39bde0d6927d10a3c24295ab0f82cb1efeae2"
   name = "github.com/ugorji/go"
   packages = ["codec"]
   pruneopts = ""
-  revision = "2adff0894ba3bc2eeb9f9aea45fefd49802e1a13"
-  version = "v1.1.4"
+  revision = "b4c50a2b199d93b13dc15e78929cfb23bfdf21ab"
+  version = "v1.1.1"
 
 [[projects]]
   digest = "1:ff8c4af041b6ebba859f3c3b5cdc915a089fea0f5af02d5a5952bb88efc39ab3"
@@ -326,7 +318,6 @@
     "github.com/gorilla/handlers",
     "github.com/gorilla/mux",
     "github.com/jmoiron/jsonq",
-    "github.com/mattn/go-sqlite3",
     "github.com/pkg/errors",
     "github.com/raff/godet",
     "github.com/sirupsen/logrus",

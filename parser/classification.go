@@ -21,10 +21,8 @@ import (
 	"net/url"
 	"strings"
 
-	_ "github.com/mattn/go-sqlite3"
-	"github.com/pkg/errors"
-
 	"github.com/CovenantSQL/CovenantSQL/client"
+	"github.com/pkg/errors"
 )
 
 type Classifier struct {

@@ -37,7 +37,6 @@ Rich Feature Set includes:
   - Careful selected use of 'unsafe' for targeted performance gains.
     100% mode exists where 'unsafe' is not used at all.
   - Lock-free (sans mutex) concurrency for scaling to 100's of cores
-  - In-place updates during decode, with option to zero the value in maps and slices prior to decode
   - Coerce types where appropriate
     e.g. decode an int in the stream into a float, decode numbers from formatted strings, etc
   - Corner Cases: 
@@ -106,7 +105,7 @@ We determine how to encode or decode by walking this decision tree
   - is there an extension registered for the type?
   - is format binary, and is type a encoding.BinaryMarshaler and BinaryUnmarshaler?
   - is format specifically json, and is type a encoding/json.Marshaler and Unmarshaler?
-  - is format text-based, and type an encoding.TextMarshaler and TextUnmarshaler?
+  - is format text-based, and type an encoding.TextMarshaler?
   - else we use a pair of functions based on the "kind" of the type e.g. map, slice, int64, etc
 
 This symmetry is important to reduce chances of issues happening because the
