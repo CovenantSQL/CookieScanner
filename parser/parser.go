@@ -236,6 +236,8 @@ func (t *Task) parseResponse(rc *recordCollector) (cookieCount int, resultData [
 		})
 	}
 
+	cookieCount = len(cookieSeqMap)
+
 	// load all cookies from browser api
 	allCookies, err := t.remote.GetAllCookies()
 	if err != nil {
@@ -245,6 +247,8 @@ func (t *Task) parseResponse(rc *recordCollector) (cookieCount int, resultData [
 
 	for _, cookie := range allCookies {
 		if _, ok := cookieSeqMap[cookie.Name]; !ok {
+			cookieCount++
+
 			// cookie plant by scripts
 			var (
 				category   = ""
@@ -283,7 +287,6 @@ func (t *Task) parseResponse(rc *recordCollector) (cookieCount int, resultData [
 		}
 	}
 
-	cookieCount = len(cookieSeqMap)
 	hasUnclassified := false
 
 	// sort unclassified cookies to the end
