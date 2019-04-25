@@ -47,6 +47,7 @@ const (
 	argPretty = "pretty"
 	argTo     = "to"
 	argAsync  = "async"
+	argDelay  = "delay"
 
 	typeJSON  = "json"
 	typeHTML  = "html"
@@ -344,7 +345,12 @@ func analyzeFunc(opts *cmd.CommonOptions) http.HandlerFunc {
 
 			if asyncReport != "" {
 				// issue async report
-				time.AfterFunc(analyzeDelay, func() {
+				myDelay, _ := time.ParseDuration(r.FormValue(argDelay))
+				if myDelay < analyzeDelay {
+					myDelay = analyzeDelay
+				}
+
+				time.AfterFunc(myDelay, func() {
 					asyncEmailReport(opts, site, mailTo)
 				})
 				sendResponse(http.StatusOK, true, nil, nil, rw)
