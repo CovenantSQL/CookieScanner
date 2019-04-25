@@ -82,9 +82,9 @@ Args:
 Generate HTML report for `covenantsql.io` using cli mode.
 
 ```shell
-$ CookieTester cli \ 
+$ CookieTester cli \
     --headless \
-    --classification covenantsql://050cdf3b860c699524bf6f6dce28c4f3e8282ac58b0e410eb340195c379adc3a?config=./config/config.yaml \
+    --classifier "covenantsql://050cdf3b860c699524bf6f6dce28c4f3e8282ac58b0e410eb340195c379adc3a?config=./config/config.yaml" \
     --html cql.html covenantsql.io
 ```
 
