@@ -75,10 +75,13 @@ Args:
 
 ### Examples
 
-Generate HTML report for `www.google.com` using cli mode.
+Generate HTML report for `covenantsql.io` using cli mode.
 
 ```shell
-$ CookieTester cli --headless --html google.html www.google.com
+$ CookieTester cli --headless --html cql.html covenantsql.io
 ```
 
-Just wait for a while, you will found `google.html` showing results containing cookie descriptions like `NID`.
+Just wait for a while, you will found `cql.html` showing results like this:
+
+![](./example.png)
+
