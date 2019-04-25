@@ -76,6 +76,7 @@ var (
 
 	maxInflightScan int
 	inflightSem     *semaphore.Weighted
+	analyzeDelay    time.Duration
 
 	mailServer   string
 	mailPort     int
@@ -129,6 +130,7 @@ func sendResponse(code int, success bool, msg interface{}, data interface{}, rw 
 func RegisterCommand(app *kingpin.Application, opts *cmd.CommonOptions) {
 	c := app.Command("server", "start a report generation server")
 	c.Flag("listen", "rpc server listen addr").Default(":9223").StringVar(&listenAddr)
+	c.Flag("delay", "duration before running analyze in async mode").DurationVar(&analyzeDelay)
 	c.Flag("max", "max inflight scan instance").IntVar(&maxInflightScan)
 	c.Flag("disable-json", "disable json output support").BoolVar(&disableJSON)
 	c.Flag("disable-html", "disable html output support").BoolVar(&disableHTML)
@@ -342,7 +344,9 @@ func analyzeFunc(opts *cmd.CommonOptions) http.HandlerFunc {
 
 			if asyncReport != "" {
 				// issue async report
-				go asyncEmailReport(opts, site, mailTo)
+				time.AfterFunc(analyzeDelay, func() {
+					asyncEmailReport(opts, site, mailTo)
+				})
 				sendResponse(http.StatusOK, true, nil, nil, rw)
 				return
 			}
