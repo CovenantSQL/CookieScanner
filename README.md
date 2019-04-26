@@ -2,6 +2,13 @@
 
 Cookie Tester is a simple utility to analyze website cookie status and generate reports for GDPR-compliance.
 
+<p align="center">
+   <a href="./example/reddit-cookie.pdf"> <img src="reddit-cookie.png" width="150"></a>
+   <a href="./example/amazon-cookie.pdf"> <img src="amazon-cookie.png" width="150"></a>
+   <a href="./example/netflix-cookie.pdf"> <img src="netflix-cookie.png" width="150"></a>
+   <a href="./example/ebay-cookie.pdf"> <img src="ebay-cookie.png" width="150"></a>
+</p>
+
 ### Online Demo
 
 Your can just try Cookie Tester on [gdprExpert.io](https://gdprexpert.io/)
@@ -10,7 +17,7 @@ Your can just try Cookie Tester on [gdprExpert.io](https://gdprexpert.io/)
 
 Requires MacOS/Linux system.
 
-First, install [`Google Chrome`](<https://www.google.com/chrome/>) in your operating system.
+First, install [`Google Chrome`](https://www.google.com/chrome/) in your operating system.
 Or you can start a headless Chrome in docker with
 
 ```shell
