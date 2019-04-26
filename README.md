@@ -1,6 +1,12 @@
 # Cookie Tester
 
 Cookie Tester is a simple utility to analyze website cookie status and generate reports for GDPR-compliance.
+We collected more than 10000 cookie description and put them in free DB service CQL:
+
+- DSN: covenantsql://050cdf3b860c699524bf6f6dce28c4f3e8282ac58b0e410eb340195c379adc3a
+- [Config & Key](./config)
+
+For how to use the "Cookie Database", please see [CQL QuickStart](https://developers.covenantsql.io/docs/en/quickstart)
 
 <p align="center">
    <a href="./example/reddit-cookie.pdf"> <img src="reddit-cookie.png" width="150"></a>
