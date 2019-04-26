@@ -58,7 +58,7 @@ const (
 	contentTypeHTML = "text/html"
 	contentTypePDF  = "application/pdf"
 
-	mailSubject = `Your CookieScan Report is Ready`
+	mailSubject = `CookieScan Report`
 )
 
 var (
