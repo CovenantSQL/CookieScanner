@@ -1,10 +1,11 @@
 # Cookie Tester
 
-Cookie Tester is a simple utility to analyze website cookie status and generate reports for GDPR-compliance.
-We collected more than 10000 cookie description and put them in free DB service CQL:
+GDPR requires that all websites that provide services to European users must provide a complete report on the use of cookies to record user information and continue to use it with the express consent of the user.
+There are several commercial Cookie Scanner online.
 
-- DSN: covenantsql://050cdf3b860c699524bf6f6dce28c4f3e8282ac58b0e410eb340195c379adc3a
-- [Config & Key](./config)
+But we decide to make our implementation Open Source. Hope to help more people getting aware of the privacy problems.
+
+Cookie Tester is a simple utility to analyze website cookie status and generate reports for GDPR-compliance.
 
 For how to use the "Cookie Database", please see [CQL QuickStart](https://developers.covenantsql.io/docs/en/quickstart)
 
@@ -14,6 +15,18 @@ For how to use the "Cookie Database", please see [CQL QuickStart](https://develo
    <a href="./example/netflix-cookie.pdf"> <img src="netflix-cookie.png" width="150"></a>
    <a href="./example/ebay-cookie.pdf"> <img src="ebay-cookie.png" width="150"></a>
 </p>
+
+### Features
+
+1. Nice HTML or PDF report
+
+1. Detailed cookie description
+
+1. We collected more than 10000 cookie description and put them in free DB service CQL:
+
+  - DSN: covenantsql://050cdf3b860c699524bf6f6dce28c4f3e8282ac58b0e410eb340195c379adc3a
+  - [Config & Key](./config)
+
 
 ### Online Demo
 
