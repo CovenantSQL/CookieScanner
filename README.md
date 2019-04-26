@@ -23,6 +23,7 @@ Frontpage sets Cookie without user Consent:
 - Netflix.com: [6 Cookies](./example/netflix-cookie.pdf)
 - Ebay.com: [5 Cookies](./example/ebay-cookie.pdf)
 - Google.com: [2 Cookies](./example/google-cookie.pdf)
+- Facebook.com: 0 Cookie
 
 ### Features
 
