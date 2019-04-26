@@ -58,8 +58,7 @@ const (
 	contentTypeHTML = "text/html"
 	contentTypePDF  = "application/pdf"
 
-	mailSubjectPrefix   = `CookieScan report for `
-	mailContentTemplate = `Your report for site %s is generated, please see the PDF attachment.`
+	mailSubject = `Your CookieScan Report is Ready`
 )
 
 var (
@@ -271,13 +270,20 @@ func asyncEmailReport(opts *cmd.CommonOptions, site string, mailTo string) {
 		}).WithError(err).Error("generate pdf report failed")
 		return
 	}
+	emailContent, err := t.FormatEmail()
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"site": site,
+			"to":   mailTo,
+		}).WithError(err).Error("generate email content failed")
+	}
 
 	d := gomail.NewPlainDialer(mailServer, mailPort, mailUser, mailPassword)
 	m := gomail.NewMessage()
 	m.SetHeader("From", mailFrom)
 	m.SetAddressHeader("To", mailTo, mailTo)
-	m.SetHeader("Subject", mailSubjectPrefix+site)
-	m.SetBody("text/html", fmt.Sprintf(mailContentTemplate, site))
+	m.SetHeader("Subject", mailSubject)
+	m.SetBody("text/html", emailContent)
 	m.Attach(tempPDF, gomail.SetHeader(map[string][]string{"Content-Type": {contentTypePDF}}))
 
 	defer m.Reset()
@@ -455,13 +461,18 @@ func analyzeFunc(opts *cmd.CommonOptions) http.HandlerFunc {
 				sendResponse(http.StatusInternalServerError, false, err, nil, rw)
 				return
 			}
+			emailContent, err := t.FormatEmail()
+			if err != nil {
+				sendResponse(http.StatusInternalServerError, false, err, nil, rw)
+				return
+			}
 
 			d := gomail.NewPlainDialer(mailServer, mailPort, mailUser, mailPassword)
 			m := gomail.NewMessage()
 			m.SetHeader("From", mailFrom)
 			m.SetAddressHeader("To", mailTo, mailTo)
-			m.SetHeader("Subject", mailSubjectPrefix+site)
-			m.SetBody("text/html", fmt.Sprintf(mailContentTemplate, site))
+			m.SetHeader("Subject", mailSubject)
+			m.SetBody("text/html", emailContent)
 			m.Attach(tempPDF, gomail.SetHeader(map[string][]string{"Content-Type": {contentTypePDF}}))
 
 			defer m.Reset()

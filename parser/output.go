@@ -107,3 +107,7 @@ func (t *Task) OutputPDFToFile(filename string) (err error) {
 
 	return
 }
+
+func (t *Task) FormatEmail() (str string, err error) {
+	return formatEmailContent(t.reportData)
+}

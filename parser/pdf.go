@@ -44,8 +44,7 @@ func init() {
 				return 0
 			}
 		},
-	}).Parse(`
-<!DOCTYPE html>
+	}).Parse(`<!DOCTYPE html>
 <meta charset="UTF-8">
 <html>
 <head>
