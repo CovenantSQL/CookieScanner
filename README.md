@@ -45,19 +45,19 @@ $ docker container run -d -p 9222:9222 zenika/alpine-chrome --no-sandbox \
  --remote-debugging-address=0.0.0.0 --remote-debugging-port=9222
 ```
 
-Then, install the `CookieTester` using `go get`.
+Then, install the `CookieScanner` using `go get`.
 
 ```shell
-$ go get github.com/CovenantSQL/CookieTester
+$ go get github.com/CovenantSQL/CookieScanner
 ```
 
 ### Usage
 
-CookieTester is capable of geneating reports in `json/html/pdf` format.
+CookieScanner is capable of geneating reports in `json/html/pdf` format.
 
 ```
-$ CookieTester --help
-usage: CookieTester [<flags>] <command> [<args> ...]
+$ CookieScanner --help
+usage: CookieScanner [<flags>] <command> [<args> ...]
 
 website cookie usage report generator
 
@@ -84,8 +84,8 @@ Commands:
   server [<flags>]
     start a report generation server
 
-$ CookieTester cli --help
-usage: CookieTester cli [<flags>] <site>
+$ CookieScanner cli --help
+usage: CookieScanner cli [<flags>] <site>
 
 generate report for a single website
 
@@ -113,7 +113,7 @@ Args:
 Generate HTML report for `covenantsql.io` using cli mode.
 
 ```shell
-$ CookieTester cli \
+$ CookieScanner cli \
     --headless \
     --classifier "covenantsql://050cdf3b860c699524bf6f6dce28c4f3e8282ac58b0e410eb340195c379adc3a?config=./config/config.yaml" \
     --html cql.html covenantsql.io

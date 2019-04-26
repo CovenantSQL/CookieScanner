@@ -20,17 +20,17 @@ import (
 	"os"
 	"time"
 
-	"github.com/CovenantSQL/CookieTester/cmd"
-	"github.com/CovenantSQL/CookieTester/cmd/cli"
-	"github.com/CovenantSQL/CookieTester/cmd/server"
-	"github.com/CovenantSQL/CookieTester/cmd/version"
-	"github.com/CovenantSQL/CookieTester/parser"
+	"github.com/CovenantSQL/CookieScanner/cmd"
+	"github.com/CovenantSQL/CookieScanner/cmd/cli"
+	"github.com/CovenantSQL/CookieScanner/cmd/server"
+	"github.com/CovenantSQL/CookieScanner/cmd/version"
+	"github.com/CovenantSQL/CookieScanner/parser"
 	"github.com/sirupsen/logrus"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
 var (
-	app      = kingpin.New("CookieTester", "website cookie usage report generator")
+	app      = kingpin.New("CookieScanner", "website cookie usage report generator")
 	logLevel string
 	options  cmd.CommonOptions
 )

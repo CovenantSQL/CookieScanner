@@ -1,6 +1,6 @@
 # build stage
 FROM golang:stretch AS builder
-WORKDIR /go/src/github.com/CovenantSQL/CookieTester
+WORKDIR /go/src/github.com/CovenantSQL/CookieScanner
 COPY . .
 RUN CGO_ENABLED=1 GOOS=linux go install -ldflags '-linkmode external -extldflags -static'
 
@@ -10,6 +10,6 @@ WORKDIR /app
 USER root
 RUN apk --no-cache add ca-certificates tini
 USER chrome
-COPY --from=builder /go/bin/CookieTester /app/
-ENTRYPOINT ["/sbin/tini", "--", "/app/CookieTester", "server"]
+COPY --from=builder /go/bin/CookieScanner /app/
+ENTRYPOINT ["/sbin/tini", "--", "/app/CookieScanner", "server"]
 CMD []
