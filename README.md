@@ -1,11 +1,11 @@
-# Cookie Tester
+# Cookie Scanner
 
 GDPR requires that all websites that provide services to European users must provide a complete report on the use of cookies to record user information and continue to use it with the express consent of the user.
 There are several commercial Cookie Scanner online.
 
 But we decide to make our implementation Open Source. Hope to help more people getting aware of the privacy problems.
 
-Cookie Tester is a simple utility to analyze website cookie status and generate reports for GDPR-compliance.
+Cookie Scanner is a simple utility to analyze website cookie status and generate reports for GDPR-compliance.
 
 For how to use the "Cookie Database", please see [CQL QuickStart](https://developers.covenantsql.io/docs/en/quickstart)
 
@@ -16,6 +16,13 @@ For how to use the "Cookie Database", please see [CQL QuickStart](https://develo
    <a href="./example/ebay-cookie.pdf"> <img src="./example/ebay-cookie.png" width="150"></a>
    <a href="./example/google-cookie.pdf"> <img src="./example/google-cookie.png" width="150"></a>
 </p>
+
+Frontpage sets Cookie without user Consent:
+- Amazon.com: [9 Cookies](./example/amazon-cookie.pdf)
+- Reddit.com: [9 Cookies](./example/reddit-cookie.pdf)
+- Netflix.com: [6 Cookies](./example/netflix-cookie.pdf)
+- Ebay.com: [5 Cookies](./example/ebay-cookie.pdf)
+- Google.com: [2 Cookies](./example/google-cookie.pdf)
 
 ### Features
 
@@ -31,7 +38,7 @@ For how to use the "Cookie Database", please see [CQL QuickStart](https://develo
 
 ### Online Demo
 
-Your can just try Cookie Tester on [gdprExpert.io](https://gdprexpert.io/)
+Your can just try Cookie Scanner on [gdprExpert.io](https://gdprexpert.io/)
 
 ### Installation
 
