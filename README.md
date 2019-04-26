@@ -10,10 +10,10 @@ Cookie Tester is a simple utility to analyze website cookie status and generate 
 For how to use the "Cookie Database", please see [CQL QuickStart](https://developers.covenantsql.io/docs/en/quickstart)
 
 <p align="center">
-   <a href="./example/reddit-cookie.pdf"> <img src="reddit-cookie.png" width="150"></a>
-   <a href="./example/amazon-cookie.pdf"> <img src="amazon-cookie.png" width="150"></a>
-   <a href="./example/netflix-cookie.pdf"> <img src="netflix-cookie.png" width="150"></a>
-   <a href="./example/ebay-cookie.pdf"> <img src="ebay-cookie.png" width="150"></a>
+   <a href="./example/reddit-cookie.pdf"> <img src="./example/reddit-cookie.png" width="150"></a>
+   <a href="./example/amazon-cookie.pdf"> <img src="./example/amazon-cookie.png" width="150"></a>
+   <a href="./example/netflix-cookie.pdf"> <img src="./example/netflix-cookie.png" width="150"></a>
+   <a href="./example/ebay-cookie.pdf"> <img src="./example/ebay-cookie.png" width="150"></a>
 </p>
 
 ### Features
