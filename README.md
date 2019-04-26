@@ -14,6 +14,7 @@ For how to use the "Cookie Database", please see [CQL QuickStart](https://develo
    <a href="./example/amazon-cookie.pdf"> <img src="./example/amazon-cookie.png" width="150"></a>
    <a href="./example/netflix-cookie.pdf"> <img src="./example/netflix-cookie.png" width="150"></a>
    <a href="./example/ebay-cookie.pdf"> <img src="./example/ebay-cookie.png" width="150"></a>
+   <a href="./example/google-cookie.pdf"> <img src="./example/google-cookie.png" width="150"></a>
 </p>
 
 ### Features
